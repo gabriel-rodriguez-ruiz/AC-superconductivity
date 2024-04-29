@@ -155,7 +155,7 @@ class Superconductor():
 
         """
         G_k = self.get_Green_function(omega, k_x, k_y, Gamma)
-        return -2 *np.imag(G_k)
+        return -2 * np.imag(G_k)
     def get_Fermi_function(self, omega, beta):
         """ Fermi function"""
         return 1/(1 + np.exp(-beta*omega))
