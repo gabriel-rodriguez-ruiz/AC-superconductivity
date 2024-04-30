@@ -8,6 +8,7 @@ Created on Mon Apr 29 16:12:01 2024
 
 import numpy as np
 from pauli_matrices import tau_0, sigma_0, tau_z, sigma_x, sigma_y, tau_x
+import matplotlib.pyplot as plt
 
 class Superconductor():
     r"""
@@ -159,3 +160,20 @@ class Superconductor():
     def get_Fermi_function(self, omega, beta):
         """ Fermi function"""
         return 1/(1 + np.exp(-beta*omega))
+    def get_Energy(self, k_x_values, k_y_values):
+        energies = np.zeros((len(k_x_values), len(k_y_values),
+                             4))
+        for i, k_x in enumerate(k_x_values):
+            for j, k_y in enumerate(k_y_values):
+                for k in range(4):
+                    H = self.get_Hamiltonian(k_x, k_y)
+                    energies[i, j, k] = np.linalg.eigvalsh(H)[k]
+        return energies
+    def plot_spectrum(self, k_x_values, k_y_values):
+        E = self.get_Energy(k_x_values, k_y_values)
+        L_y = len(k_y_values)//2
+        fig, ax = plt.subplots()
+        ax.plot(k_x_values, E[:,L_y,0])
+        ax.plot(k_x_values, E[:,L_y,1])
+        ax.plot(k_x_values, E[:,L_y,2])
+        ax.plot(k_x_values, E[:,L_y,3])
