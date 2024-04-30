@@ -17,10 +17,6 @@ class Superconductor():
         
     Parameters
     ----------    
-    phi_x : float
-        Flux in x.
-    phi_y : float
-        Flux in y.
     w_0 : float
         Hopping amplitude.
     mu : float
@@ -42,21 +38,34 @@ class Superconductor():
     t : float
         Time.
     """
-    def __init__(self, phi_x=0, phi_y=0,
-                 w_0=0, mu=0, Delta=0, B_x=0, B_y=0, Lambda=0,
-                 Omega=0, A_x=0, A_y=0, t=0):
-        self.phi_x = phi_x
-        self.phi_y = phi_y
+    def __init__(self, w_0=0, mu=0, Delta=0,
+                 B_x=0, B_y=0, Lambda=0):
         self.w_0 = w_0
         self.mu = mu
         self.Delta = Delta
         self.Lambda = Lambda
         self.B_x = B_x
         self.B_y = B_y
-        self.Omega = Omega
-        self.A_x = A_x
-        self.A_y = A_y
-        self.t = t
+    def get_epsilon(self, k_x, k_y):
+        epsilon_k_x = (
+                       -2*self.w_0*np.cos(k_x)
+                       + 2*self.Lambda*np.sin(k_x)
+                       ) * np.kron(tau_z, sigma_0)
+        epsilon_k_y = (
+                       -2*self.w_0*np.cos(k_y)
+                       - 2*self.Lambda*np.sin(k_y)
+                       ) * np.kron(tau_z, sigma_0)
+        return [epsilon_k_x, epsilon_k_y]
+    def get_velocity(self, k_x, k_y,):
+        v_k_x = (
+                 2*self.w_0*np.sin(k_x)
+                 + 2*self.Lambda*np.cos(k_x)
+                 ) * np.kron(tau_z, sigma_0)
+        v_k_y = (
+                 2*self.w_0*np.sin(k_y)
+                 - 2*self.Lambda*np.cos(k_y)
+                 ) * np.kron(tau_z, sigma_0)
+        return [v_k_x, v_k_y]
     def get_Hamiltonian(self, k_x, k_y):
         r""" Periodic Hamiltonian in x and y with flux.
         
@@ -65,41 +74,23 @@ class Superconductor():
             H = \frac{1}{2}\sum_{\mathbf{k}} \psi_{\mathbf{k}}^\dagger H_{\mathbf{k}} \psi_{\mathbf{k}}
             
             H_{\mathbf{k}} =  
-                \xi_k(t)\tau_z\sigma_0 + \Delta \tau_x\sigma_0
-                + \lambda_{k_x}(t)\tau_z\sigma_y
-                + \lambda_{k_y}(t)\tau_z\sigma_x                
+                \xi_k\tau_z\sigma_0 + \Delta \tau_x\sigma_0
+                + \lambda_{k_x}\tau_z\sigma_y
+                + \lambda_{k_y}\tau_z\sigma_x                
                 -B_x\tau_0\sigma_x - B_y\tau_0\sigma_y 
             
             \vec{c}_k = (c_{k,\uparrow}, c_{k,\downarrow},c^\dagger_{-k,\downarrow},
                        -c^\dagger_{-k,\uparrow})^T
         
-            \xi_k(t) = -2w_0(cos(k_x+\phi_x)+cos(k_y+\phi_y)) - \mu
-                        +2 w_0 (A_{1,x}sin(k_x+\phi_x) + A_{1,y}sin(k_y+\phi_y)) cos(\Omega t)
+            \xi_k = -2w_0(cos(k_x)+cos(k_y)) - \mu
             
-            \lambda_{k_x}(t) = 2\lambda \left[sin(k_x+\phi_x)
-            + cos(k_x+\phi_x)A_{1,x} cos(\Omega t)\right]
-            
-            \lambda_{k_y}(t) =  - 2\lambda \left[sin(k_y+\phi_y)
-             + cos(k_y+\phi_y)A_{1,y} cos(\Omega t)\right]
+            \lambda_{k_x} = 2\lambda sin(k_x)
+
+            \lambda_{k_y}(t) =  - 2\lambda sin(k_y)
         """
-        chi_k = (
-                 -2*self.w_0*((np.cos(k_x + self.phi_x)
-                                + np.cos(k_y + self.phi_y)))
-                 - self.mu
-                 + 2*self.w_0*(self.A_x * np.sin(k_x + self.phi_x)
-                               + self.A_y * np.sin(k_y + self.phi_y))
-                 * np.cos(self.Omega*self.t)
-                 )
-        Lambda_k_x = (
-                      2*self.Lambda*(np.sin(k_x + self.phi_x) 
-                         + self.A_x * np.cos(k_x + self.phi_x)
-                         * np.cos(self.Omega * self.t) )
-                      )
-        Lambda_k_y = ( 
-                      -2*self.Lambda*(np.sin(k_y + self.phi_y) 
-                         + self.A_y * np.cos(k_y + self.phi_y)
-                         * np.cos(self.Omega * self.t) )
-                      )
+        chi_k = -2*self.w_0*(np.cos(k_x) + np.cos(k_y)) - self.mu
+        Lambda_k_x = 2*self.Lambda*np.sin(k_x)
+        Lambda_k_y = -2*self.Lambda*np.sin(k_y) 
         H = (
              chi_k * np.kron(tau_z, sigma_0)
              + Lambda_k_x * np.kron(tau_z, sigma_y)
@@ -153,13 +144,12 @@ class Superconductor():
         -------
         ndarray
             Spectral density.
-
         """
         G_k = self.get_Green_function(omega, k_x, k_y, Gamma)
         return -2 * np.imag(G_k)
     def get_Fermi_function(self, omega, beta):
         """ Fermi function"""
-        return 1/(1 + np.exp(-beta*omega))
+        return 1/(1 + np.exp(beta*omega))
     def get_Energy(self, k_x_values, k_y_values):
         energies = np.zeros((len(k_x_values), len(k_y_values),
                              4))
@@ -172,8 +162,73 @@ class Superconductor():
     def plot_spectrum(self, k_x_values, k_y_values):
         E = self.get_Energy(k_x_values, k_y_values)
         L_y = len(k_y_values)//2
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        ax1.plot(k_x_values, E[:,L_y,0])
+        ax1.plot(k_x_values, E[:,L_y,1])
+        ax1.plot(k_x_values, E[:,L_y,2])
+        ax1.plot(k_x_values, E[:,L_y,3])
+        ax1.set_xlabel(r"$k_x$")
+        ax1.set_ylabel(r"$E(k_x,k_y=0)$")
+        X, Y = np.meshgrid(k_x_values, k_y_values)
+        C1 = ax2.contour(Y, X, E[:,:,1]>0, 0, colors="orange") #notice the inversion of X and Y
+        C2 = ax2.contour(Y, X, E[:,:,2]<0, 0, colors="green")
+        ax2.clabel(C1, inline=True, fontsize=10)
+        ax2.clabel(C2, inline=True, fontsize=10)
+        ax2.set_xlabel(r"$k_x$")
+        ax2.set_ylabel(r"$k_y$")
+        plt.tight_layout()
+    def plot_spectral_density(self, omega_values, k_x, k_y, Gamma):
+        rho = np.zeros((len(omega_values), 4 , 4))
+        for i, omega in enumerate(omega_values):
+            rho[i, :, :] = self.get_spectral_density(omega, k_x, k_y, Gamma)
         fig, ax = plt.subplots()
-        ax.plot(k_x_values, E[:,L_y,0])
-        ax.plot(k_x_values, E[:,L_y,1])
-        ax.plot(k_x_values, E[:,L_y,2])
-        ax.plot(k_x_values, E[:,L_y,3])
+        ax.plot(omega_values, rho[:, 0, 0], label="0,0")
+        ax.set_xlabel(r"$\omega$")
+        ax.set_ylabel(r"$\rho_{\mathbf{k}}(\omega)$")
+        plt.legend()
+    def get_conductivity(self, alpha, beta, L_x, L_y, omega_values, Gamma, Beta, Omega):
+        dw = np.diff(omega_values)[0]
+        k_x_values = np.pi/L_x*np.arange(-L_x, L_x)
+        k_y_values = np.pi/L_y*np.arange(-L_y, L_y)
+        integrand_inductive = np.zeros((len(k_x_values), len(k_y_values),
+                                        len(omega_values)))
+        integrand_ressistive = np.zeros((len(k_x_values), len(k_y_values),
+                                         len(omega_values)))
+        for i, k_x in enumerate(k_x_values):
+            for j, k_y in enumerate(k_y_values):
+                epsilon = self.get_epsilon(k_x, k_y)
+                v = self.get_velocity(k_x, k_y)
+                for k, omega in enumerate(omega_values):
+                    rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+                    G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+                    G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+                    fermi_function = self.get_Fermi_function(omega, Beta) 
+                    if alpha==beta:
+                        integrand_inductive[i, j, k] = (
+                                                        1/(2*np.pi) * fermi_function
+                                                        * np.trace(
+                                                                   epsilon[alpha] * rho
+                                                                   - v[alpha] @ np.real(G_plus_Omega + G_minus_Omega)
+                                                                   @ v[beta] @ rho
+                                                                   )
+                                                        )
+                    else:
+                        integrand_inductive[i, j, k] = (
+                                                        1/(2*np.pi) * fermi_function
+                                                        * np.trace(
+                                                                   - v[alpha] @ np.real(G_plus_Omega + G_minus_Omega)
+                                                                   @ v[beta] @ rho
+                                                                   )
+                                                        )
+                    integrand_ressistive[i, j, k] = (
+                                                     1/(2*np.pi) * fermi_function
+                                                     * np.trace(
+                                                                - v[alpha] @ np.imag(G_plus_Omega - G_minus_Omega)
+                                                                @ v[beta] @ rho
+                                                                )
+                                                     )
+        integral_inductive = np.sum(integrand_inductive, axis=2) * dw
+        conductivity_inductive = np.sum(integral_inductive)
+        integral_ressistive = np.sum(integrand_ressistive, axis=2) * dw
+        conductivity_ressistive = np.sum(integral_ressistive)
+        return [conductivity_inductive, conductivity_ressistive]
