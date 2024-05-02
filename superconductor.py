@@ -48,23 +48,23 @@ class Superconductor():
         self.B_y = B_y
     def get_epsilon(self, k_x, k_y):
         epsilon_k_x = (
-                       -2*self.w_0*np.cos(k_x)
-                       + 2*self.Lambda*np.sin(k_x)
-                       ) * np.kron(tau_z, sigma_0)
+                       -2*self.w_0*np.cos(k_x) * np.kron(tau_z, sigma_0)
+                       + 2*self.Lambda*np.sin(k_x) * np.kron(tau_z, sigma_y)
+                       )
         epsilon_k_y = (
-                       -2*self.w_0*np.cos(k_y)
-                       - 2*self.Lambda*np.sin(k_y)
-                       ) * np.kron(tau_z, sigma_0)
+                       -2*self.w_0*np.cos(k_y) * np.kron(tau_z, sigma_0)
+                       - 2*self.Lambda*np.sin(k_y) * np.kron(tau_z, sigma_x)
+                       )
         return [epsilon_k_x, epsilon_k_y]
     def get_velocity(self, k_x, k_y,):
         v_k_x = (
-                 2*self.w_0*np.sin(k_x)
-                 + 2*self.Lambda*np.cos(k_x)
-                 ) * np.kron(tau_z, sigma_0)
+                 2*self.w_0*np.sin(k_x) * np.kron(tau_z, sigma_0)
+                 + 2*self.Lambda*np.cos(k_x) * np.kron(tau_z, sigma_y)
+                 )
         v_k_y = (
-                 2*self.w_0*np.sin(k_y)
-                 - 2*self.Lambda*np.cos(k_y)
-                 ) * np.kron(tau_z, sigma_0)
+                 2*self.w_0*np.sin(k_y) * np.kron(tau_z, sigma_0)
+                 - 2*self.Lambda*np.cos(k_y) * np.kron(tau_z, sigma_x)
+                 )
         return [v_k_x, v_k_y]
     def get_Hamiltonian(self, k_x, k_y):
         r""" Periodic Hamiltonian in x and y with flux.
@@ -188,12 +188,13 @@ class Superconductor():
         plt.legend()
     def get_conductivity(self, alpha, beta, L_x, L_y, omega_values, Gamma, Beta, Omega):
         dw = np.diff(omega_values)[0]
-        k_x_values = np.pi/L_x*np.arange(-L_x, L_x)
-        k_y_values = np.pi/L_y*np.arange(-L_y, L_y)
+        # dw = 1
+        k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
+        k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
         integrand_inductive = np.zeros((len(k_x_values), len(k_y_values),
-                                        len(omega_values)))
+                                        len(omega_values)), dtype=complex)
         integrand_ressistive = np.zeros((len(k_x_values), len(k_y_values),
-                                         len(omega_values)))
+                                         len(omega_values)), dtype=complex)
         for i, k_x in enumerate(k_x_values):
             for j, k_y in enumerate(k_y_values):
                 epsilon = self.get_epsilon(k_x, k_y)
@@ -228,7 +229,7 @@ class Superconductor():
                                                                 )
                                                      )
         integral_inductive = np.sum(integrand_inductive, axis=2) * dw
-        conductivity_inductive = np.sum(integral_inductive)
+        conductivity_inductive = 1/(L_x*L_y) * np.sum(integral_inductive)
         integral_ressistive = np.sum(integrand_ressistive, axis=2) * dw
-        conductivity_ressistive = np.sum(integral_ressistive)
+        conductivity_ressistive = 1/(L_x*L_y) * np.sum(integral_ressistive)
         return [conductivity_inductive, conductivity_ressistive]
