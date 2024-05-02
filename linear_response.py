@@ -30,7 +30,7 @@ params = {"w_0":w_0, "Delta":Delta,
 
 k_x_values = np.pi/L_x*np.arange(-L_x, L_x)
 k_y_values = np.pi/L_y*np.arange(-L_y, L_y)
-Gamma = 0.01
+Gamma = 0.1
 alpha = 0
 beta = 0
 Beta = 1000
