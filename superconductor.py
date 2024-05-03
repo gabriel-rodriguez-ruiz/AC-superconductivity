@@ -146,7 +146,7 @@ class Superconductor():
             Spectral density.
         """
         G_k = self.get_Green_function(omega, k_x, k_y, Gamma)
-        return -2 * np.imag(G_k)
+        return G_k @ (2*Gamma*np.kron(tau_0, sigma_0)) @ G_k.conj().T
     def get_Fermi_function(self, omega, beta):
         """ Fermi function"""
         return 1/(1 + np.exp(beta*omega))
@@ -209,16 +209,18 @@ class Superconductor():
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
                                                                    epsilon[alpha] * rho
-                                                                   - v[alpha] @ np.real(G_plus_Omega + G_minus_Omega)
-                                                                   @ v[beta] @ rho
+                                                                   - v[alpha] @ np.real((G_plus_Omega
+                                                                                         + G_minus_Omega)
+                                                                                        @ v[beta] @ rho)
                                                                    )
                                                         )
                     else:
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   - v[alpha] @ np.real(G_plus_Omega + G_minus_Omega)
-                                                                   @ v[beta] @ rho
+                                                                   -v[alpha] @ np.real((G_plus_Omega
+                                                                                         + G_minus_Omega)
+                                                                                        @ v[beta] @ rho)
                                                                    )
                                                         )
                     integrand_ressistive[i, j, k] = (

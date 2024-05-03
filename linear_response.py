@@ -9,8 +9,8 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 10
-L_y = 10
+L_x = 100
+L_y = 100
 w_0 = 10
 Delta = 0
 mu = -32
