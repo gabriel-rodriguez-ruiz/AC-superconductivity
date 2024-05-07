@@ -48,23 +48,23 @@ class Superconductor():
         self.B_y = B_y
     def get_epsilon(self, k_x, k_y):
         epsilon_k_x = (
-                       -2*self.w_0*np.cos(k_x) * np.kron(tau_z, sigma_0)
-                       + 2*self.Lambda*np.sin(k_x) * np.kron(tau_z, sigma_y)
-                       )
+                        -2*self.w_0*np.cos(k_x) * np.kron(tau_z, sigma_0)
+                        + 2*self.Lambda*np.sin(k_x) * np.kron(tau_z, sigma_y)
+                        )
         epsilon_k_y = (
-                       -2*self.w_0*np.cos(k_y) * np.kron(tau_z, sigma_0)
-                       - 2*self.Lambda*np.sin(k_y) * np.kron(tau_z, sigma_x)
-                       )
+                        -2*self.w_0*np.cos(k_y) * np.kron(tau_z, sigma_0)
+                        - 2*self.Lambda*np.sin(k_y) * np.kron(tau_z, sigma_x)
+                        )
         return [epsilon_k_x, epsilon_k_y]
     def get_velocity(self, k_x, k_y,):
         v_k_x = (
-                 2*self.w_0*np.sin(k_x) * np.kron(tau_z, sigma_0)
-                 + 2*self.Lambda*np.cos(k_x) * np.kron(tau_z, sigma_y)
-                 )
+                  2*self.w_0*np.sin(k_x) * np.kron(tau_z, sigma_0)
+                  + 2*self.Lambda*np.cos(k_x) * np.kron(tau_z, sigma_y)
+                  )
         v_k_y = (
-                 2*self.w_0*np.sin(k_y) * np.kron(tau_z, sigma_0)
-                 - 2*self.Lambda*np.cos(k_y) * np.kron(tau_z, sigma_x)
-                 )
+                  2*self.w_0*np.sin(k_y) * np.kron(tau_z, sigma_0)
+                  - 2*self.Lambda*np.cos(k_y) * np.kron(tau_z, sigma_x)
+                  )
         return [v_k_x, v_k_y]
     def get_Hamiltonian(self, k_x, k_y):
         r""" Periodic Hamiltonian in x and y with flux.
@@ -92,13 +92,13 @@ class Superconductor():
         Lambda_k_x = 2*self.Lambda*np.sin(k_x)
         Lambda_k_y = -2*self.Lambda*np.sin(k_y) 
         H = (
-             chi_k * np.kron(tau_z, sigma_0)
-             + Lambda_k_x * np.kron(tau_z, sigma_y)
-             + Lambda_k_y * np.kron(tau_z, sigma_x)
-             - self.B_x * np.kron(tau_0, sigma_x)
-             - self.B_y * np.kron(tau_0, sigma_y)
-             + self.Delta * np.kron(tau_x, sigma_0)
-             ) * 1/2
+              chi_k * np.kron(tau_z, sigma_0)
+              + Lambda_k_x * np.kron(tau_z, sigma_y)
+              + Lambda_k_y * np.kron(tau_z, sigma_x)
+              - self.B_x * np.kron(tau_0, sigma_x)
+              - self.B_y * np.kron(tau_0, sigma_y)
+              + self.Delta * np.kron(tau_x, sigma_0)
+              ) * 1/2
         return H
     def get_Green_function(self, omega, k_x, k_y, Gamma):
         r"""
