@@ -9,13 +9,13 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 10
-L_y = 10
+L_x = 200
+L_y = 200
 w_0 = 10
 Delta = 0.2
-mu = -32
+mu = -40
 theta = np.pi/2
-B = 0#2*Delta
+B = 0
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
@@ -28,22 +28,24 @@ params = {"w_0":w_0, "Delta":Delta,
           "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
           }
 
-k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
-k_y_values = 2*np.pi/L_y*np.arange(0, L_y)
+k_x_values = np.pi/L_x*np.arange(-L_x, L_x)#2*np.pi/L_x*np.arange(0, L_x)
+k_y_values = np.pi/L_x*np.arange(-L_y, L_y)#2*np.pi/L_y*np.arange(0, L_y)
 Gamma = 0.1
-alpha = 1
-beta = 1
+alpha = 0
+beta = 0
 Beta = 1000
-omega_values = np.linspace(-40, 5, 100)
-# omega_values = [-10]
+
+omega_values = np.linspace(-45, 0, 200)
 
 S = Superconductor(**params)
-# S.plot_spectrum(k_x_values, k_y_values)
-# S.plot_spectral_density(np.linspace(-100, 100, 100),
-#                          k_x=np.pi, k_y=np.pi, Gamma=Gamma)
+
+S.plot_spectrum(k_x_values, k_y_values)
+S.plot_spectral_density(omega_values,
+                        k_x=-np.pi, k_y=-np.pi, Gamma=Gamma)
+                          
 
 #%% DC-conductivity
-sigma = S.get_conductivity(alpha, beta, L_x, L_y, omega_values, Gamma, Beta, Omega)
+sigma = S.get_conductivity_zero_Temperature(alpha, beta, L_x, L_y, omega_values, Gamma, Omega)
 print(sigma)
 
 #%% Convergence in size
@@ -81,7 +83,7 @@ ax.set_ylabel(r"$\sigma(\omega, \Omega=0)$")
 plt.legend()
 
 #%% Conductivity vs B
-B_values = np.linspace(0, Delta, 10)
+B_values = np.linspace(0, Delta, 20)
 
 sigma_xx = np.zeros((len(B_values), 2), dtype=complex)
 sigma_yy = np.zeros((len(B_values), 2), dtype=complex)
@@ -89,8 +91,8 @@ n = np.zeros(len(B_values))
 for i, B in enumerate(B_values):
     S.B_x = B * np.cos(theta)
     S.B_y = B * np.sin(theta)
-    sigma_xx[i, 0], sigma_xx[i, 1] = S.get_conductivity(0, 0, L_x, L_y, omega_values, Gamma, Beta, Omega)
-    sigma_yy[i, 0], sigma_yy[i, 1] = S.get_conductivity(1, 1, L_x, L_y, omega_values, Gamma, Beta, Omega)
+    sigma_xx[i, 0], sigma_xx[i, 1] = S.get_conductivity_zero_Temperature(0, 0, L_x, L_y, omega_values, Gamma, Omega)
+    sigma_yy[i, 0], sigma_yy[i, 1] = S.get_conductivity_zero_Temperature(1, 1, L_x, L_y, omega_values, Gamma, Omega)
     print(i)
     
 fig, ax = plt.subplots()

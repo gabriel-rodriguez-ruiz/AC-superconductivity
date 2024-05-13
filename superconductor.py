@@ -146,7 +146,8 @@ class Superconductor():
             Spectral density.
         """
         G_k = self.get_Green_function(omega, k_x, k_y, Gamma)
-        return G_k @ (2*Gamma*np.kron(tau_0, sigma_0)) @ G_k.conj().T
+        # return G_k @ (2*Gamma*np.kron(tau_0, sigma_0)) @ G_k.conj().T
+        return 1j * (G_k - G_k.conj().T)
     def get_Fermi_function(self, omega, beta):
         """ Fermi function"""
         return 1/(1 + np.exp(beta*omega))
@@ -168,24 +169,29 @@ class Superconductor():
         ax1.plot(k_x_values, E[:,L_y,2])
         ax1.plot(k_x_values, E[:,L_y,3])
         ax1.set_xlabel(r"$k_x$")
-        ax1.set_ylabel(r"$E(k_x,k_y=0)$")
+        ax1.set_ylabel(r"$E(k_x,k_y=$"+f"{np.round(k_y_values[L_y],2)})")
         X, Y = np.meshgrid(k_x_values, k_y_values)
-        C1 = ax2.contour(Y, X, E[:,:,1]>0, 0, colors="orange") #notice the inversion of X and Y
-        C2 = ax2.contour(Y, X, E[:,:,2]<0, 0, colors="green")
+        C1 = ax2.contour(Y, X, E[:,:,1]>0, 0, colors="C1") #notice the inversion of X and Y
+        C2 = ax2.contour(Y, X, E[:,:,2]<0, 0, colors="C2")
+        C3 = ax2.contour(Y, X, E[:,:,0], 10, colors="C0")
         ax2.clabel(C1, inline=True, fontsize=10)
         ax2.clabel(C2, inline=True, fontsize=10)
+        ax2.clabel(C3, inline=True, fontsize=10)
         ax2.set_xlabel(r"$k_x$")
         ax2.set_ylabel(r"$k_y$")
         plt.tight_layout()
     def plot_spectral_density(self, omega_values, k_x, k_y, Gamma):
-        rho = np.zeros((len(omega_values), 4 , 4))
+        rho = np.zeros((len(omega_values), 4 , 4), dtype=complex)
         for i, omega in enumerate(omega_values):
             rho[i, :, :] = self.get_spectral_density(omega, k_x, k_y, Gamma)
-        fig, ax = plt.subplots()
-        ax.plot(omega_values, rho[:, 0, 0], label="0,0")
-        ax.set_xlabel(r"$\omega$")
-        ax.set_ylabel(r"$\rho_{\mathbf{k}}(\omega)$")
-        plt.legend()
+        fig, axs = plt.subplots(4, 4)
+        for i in range(4):
+            for j in range(4):
+                axs[i,j].plot(omega_values, rho[:, i,j], label=r"$(kx, ky)=$"+f"({np.round(k_x,2)}, {np.round(k_y,2)})")
+        fig.supxlabel(r"$\omega$")
+        fig.supylabel(r"$\hat{\rho}_{\mathbf{k}}(\omega)$")
+        fig.suptitle(r"$(kx, ky)=$"+f"({np.round(k_x,2)}, {np.round(k_y,2)})")
+        plt.tight_layout()
     def get_conductivity(self, alpha, beta, L_x, L_y, omega_values, Gamma, Beta, Omega):
         dw = np.diff(omega_values)[0]
         # dw = 1
@@ -206,6 +212,66 @@ class Superconductor():
                     G_plus_Omega_dagger = G_plus_Omega.conj().T
                     G_minus_Omega_dagger = G_minus_Omega.conj().T
                     fermi_function = self.get_Fermi_function(omega, Beta) 
+                    if alpha==beta:
+                        integrand_inductive[i, j, k] = (
+                                                        1/(2*np.pi) * fermi_function
+                                                        * np.trace(
+                                                                   epsilon[alpha] @ rho
+                                                                   - 1/2* v[alpha] @ (G_plus_Omega
+                                                                                      + G_minus_Omega
+                                                                                      + G_plus_Omega_dagger
+                                                                                      + G_minus_Omega_dagger)
+                                                                                       @ v[beta] @ rho
+                                                                   )
+                                                        )
+                    else:
+                        integrand_inductive[i, j, k] = (
+                                                        1/(2*np.pi) * fermi_function
+                                                        * np.trace(
+                                                                   - 1/2*(v[alpha] @ (G_plus_Omega
+                                                                                      + G_minus_Omega) @ v[beta]              
+                                                                          + v[beta] @ (G_plus_Omega_dagger
+                                                                                       + G_minus_Omega_dagger
+                                                                                       ) @ v[alpha]
+                                                                          ) @ rho
+                                                                   )
+                                                        )
+                    integrand_ressistive[i, j, k] = (
+                                                     1/(2*np.pi) * fermi_function
+                                                        * np.trace(
+                                                                   1j/2*(v[alpha] @ (G_plus_Omega
+                                                                                     - G_minus_Omega) @ v[beta]              
+                                                                         - v[beta] @ (G_plus_Omega_dagger
+                                                                                      - G_minus_Omega_dagger
+                                                                                       ) @ v[alpha]
+                                                                          ) @ rho
+                                                                )
+                                                     )
+        integral_inductive = np.sum(integrand_inductive, axis=2) * dw
+        conductivity_inductive = 1/(L_x*L_y) * np.sum(integral_inductive)
+        integral_ressistive = np.sum(integrand_ressistive, axis=2) * dw
+        conductivity_ressistive = 1/(L_x*L_y) * np.sum(integral_ressistive)
+        return [conductivity_inductive, conductivity_ressistive]
+    def get_conductivity_zero_Temperature(self, alpha, beta, L_x, L_y, omega_values, Gamma, Omega):
+        dw = np.diff(omega_values)[0]
+        # dw = 1
+        k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
+        k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
+        integrand_inductive = np.zeros((len(k_x_values), len(k_y_values),
+                                        len(omega_values)), dtype=complex)
+        integrand_ressistive = np.zeros((len(k_x_values), len(k_y_values),
+                                         len(omega_values)), dtype=complex)
+        for i, k_x in enumerate(k_x_values):
+            for j, k_y in enumerate(k_y_values):
+                epsilon = self.get_epsilon(k_x, k_y)
+                v = self.get_velocity(k_x, k_y)
+                for k, omega in enumerate(omega_values):
+                    rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+                    G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+                    G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+                    G_plus_Omega_dagger = G_plus_Omega.conj().T
+                    G_minus_Omega_dagger = G_minus_Omega.conj().T
+                    fermi_function = 1 - np.heaviside(omega, 0)
                     if alpha==beta:
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
