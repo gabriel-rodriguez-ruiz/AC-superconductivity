@@ -203,31 +203,42 @@ class Superconductor():
                     rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
                     G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
                     G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+                    G_plus_Omega_dagger = G_plus_Omega.conj().T
+                    G_minus_Omega_dagger = G_minus_Omega.conj().T
                     fermi_function = self.get_Fermi_function(omega, Beta) 
                     if alpha==beta:
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   epsilon[alpha] * rho
-                                                                   - v[alpha] @ np.real((G_plus_Omega
-                                                                                         + G_minus_Omega)
-                                                                                        @ v[beta] @ rho)
+                                                                   epsilon[alpha] @ rho
+                                                                   - 1/2* v[alpha] @ (G_plus_Omega
+                                                                                      + G_minus_Omega
+                                                                                      + G_plus_Omega_dagger
+                                                                                      + G_minus_Omega_dagger)
+                                                                                       @ v[beta] @ rho
                                                                    )
                                                         )
                     else:
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   -v[alpha] @ np.real((G_plus_Omega
-                                                                                         + G_minus_Omega)
-                                                                                        @ v[beta] @ rho)
+                                                                   - 1/2*(v[alpha] @ (G_plus_Omega
+                                                                                      + G_minus_Omega) @ v[beta]              
+                                                                          + v[beta] @ (G_plus_Omega_dagger
+                                                                                       + G_minus_Omega_dagger
+                                                                                       ) @ v[alpha]
+                                                                          ) @ rho
                                                                    )
                                                         )
                     integrand_ressistive[i, j, k] = (
                                                      1/(2*np.pi) * fermi_function
-                                                     * np.trace(
-                                                                - v[alpha] @ np.imag(G_plus_Omega - G_minus_Omega)
-                                                                @ v[beta] @ rho
+                                                        * np.trace(
+                                                                   1j/2*(v[alpha] @ (G_plus_Omega
+                                                                                     - G_minus_Omega) @ v[beta]              
+                                                                         - v[beta] @ (G_plus_Omega_dagger
+                                                                                      - G_minus_Omega_dagger
+                                                                                       ) @ v[alpha]
+                                                                          ) @ rho
                                                                 )
                                                      )
         integral_inductive = np.sum(integrand_inductive, axis=2) * dw
