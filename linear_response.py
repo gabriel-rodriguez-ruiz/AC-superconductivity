@@ -9,8 +9,8 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 200
-L_y = 200
+L_x = 300
+L_y = 300
 w_0 = 10
 Delta = 0.2
 mu = -40
@@ -35,13 +35,13 @@ alpha = 0
 beta = 0
 Beta = 1000
 
-omega_values = np.linspace(-45, 0, 200)
+omega_values = np.linspace(-45, 0, 300)
 
 S = Superconductor(**params)
 
-S.plot_spectrum(k_x_values, k_y_values)
-S.plot_spectral_density(omega_values,
-                        k_x=-np.pi, k_y=-np.pi, Gamma=Gamma)
+# S.plot_spectrum(k_x_values, k_y_values)
+# S.plot_spectral_density(omega_values,
+#                         k_x=-np.pi, k_y=-np.pi, Gamma=Gamma)
                           
 
 #%% DC-conductivity
@@ -83,7 +83,7 @@ ax.set_ylabel(r"$\sigma(\omega, \Omega=0)$")
 plt.legend()
 
 #%% Conductivity vs B
-B_values = np.linspace(0, Delta, 20)
+B_values = np.linspace(0, 3*Delta, 20)
 
 sigma_xx = np.zeros((len(B_values), 2), dtype=complex)
 sigma_yy = np.zeros((len(B_values), 2), dtype=complex)
