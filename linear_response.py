@@ -9,11 +9,11 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 300
-L_y = 300
+L_x = 200
+L_y = 200
 w_0 = 10
 Delta = 0.2
-mu = -40
+mu = -32
 theta = np.pi/2
 B = 0
 B_x = B * np.cos(theta)
@@ -35,7 +35,7 @@ alpha = 0
 beta = 0
 Beta = 1000
 
-omega_values = np.linspace(-45, 0, 300)
+omega_values = np.linspace(-45, 0, 200)
 
 S = Superconductor(**params)
 
@@ -83,7 +83,7 @@ ax.set_ylabel(r"$\sigma(\omega, \Omega=0)$")
 plt.legend()
 
 #%% Conductivity vs B
-B_values = np.linspace(0, 3*Delta, 20)
+B_values = np.linspace(0, Delta, 10)
 
 sigma_xx = np.zeros((len(B_values), 2), dtype=complex)
 sigma_yy = np.zeros((len(B_values), 2), dtype=complex)
