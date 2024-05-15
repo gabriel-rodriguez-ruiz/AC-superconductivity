@@ -19,8 +19,8 @@ sigma_y = sp.Matrix([[0, -sp.I],
 
 omega, eta, chi_k, Delta, Lambda= sp.symbols("omega eta chi_k Delta lambda", real=True)
 H_k = (
-       -chi_k * TensorProduct(tau_z, sigma_0)
-        -Delta * TensorProduct(tau_x, sigma_0)
+       chi_k * TensorProduct(tau_z, sigma_0)
+        +Delta * TensorProduct(tau_x, sigma_0)
         # +2*Lambda * TensorProduct(tau_z, sigma_y)
         # -2*Lambda * TensorProduct(tau_z, sigma_x)
        )

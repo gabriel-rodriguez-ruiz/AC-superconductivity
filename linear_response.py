@@ -110,3 +110,13 @@ ax.set_xlabel(r"$\frac{B_y}{\Delta}$")
 ax.set_ylabel(r"$\sigma(B_y)$")
 ax.legend()
 plt.tight_layout()
+
+#%%
+from pathlib import Path
+
+data_folder = Path("Data/")
+
+file_to_open = data_folder / "K_alpha_alpha_mu_-40_L=200.npz"
+np.savez(file_to_open , sigma_xx=sigma_xx,
+         sigma_yy=sigma_yy, **params,
+         B_values=B_values)
