@@ -9,11 +9,11 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 200
-L_y = 200
+L_x = 100
+L_y = 100
 w_0 = 10
 Delta = 0.2
-mu = -32
+mu = -40
 theta = np.pi/2
 B = 0
 B_x = B * np.cos(theta)
@@ -35,7 +35,7 @@ alpha = 0
 beta = 0
 Beta = 1000
 
-omega_values = np.linspace(-45, 0, 200)
+omega_values = np.linspace(-45, 0, 100)
 
 S = Superconductor(**params)
 
