@@ -12,14 +12,14 @@ import matplotlib.pyplot as plt
 L_x = 100
 L_y = 100
 w_0 = 10
-Delta = 0.2
+Delta = 0
 mu = -40
 theta = np.pi/2
 B = 0
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
-Omega = 0
+Omega = 0.1
 t = 0
 A_x = 0
 A_y = 0
@@ -50,12 +50,12 @@ print(sigma)
 
 #%% Convergence in size
 
-L_values = np.linspace(10, 100, 10)
+L_values = np.linspace(10, 100, 20)
 sigma = np.zeros((len(L_values), 2), dtype=complex)
 for i, L in enumerate(L_values):
     L_x = L
     L_y = L
-    sigma[i, :] = S.get_conductivity(alpha, beta, L_x, L_y, omega_values, Gamma, Beta, Omega)
+    sigma[i, :] = S.get_conductivity_zero_Temperature(alpha, beta, L_x, L_y, omega_values, Gamma, Omega)
     print(i)
     
 fig, ax = plt.subplots()
@@ -85,21 +85,21 @@ plt.legend()
 #%% Conductivity vs B
 B_values = np.linspace(0, Delta, 10)
 
-sigma_xx = np.zeros((len(B_values), 2), dtype=complex)
-sigma_yy = np.zeros((len(B_values), 2), dtype=complex)
+K_xx = np.zeros((len(B_values), 2), dtype=complex)
+K_yy = np.zeros((len(B_values), 2), dtype=complex)
 n = np.zeros(len(B_values))
 for i, B in enumerate(B_values):
     S.B_x = B * np.cos(theta)
     S.B_y = B * np.sin(theta)
-    sigma_xx[i, 0], sigma_xx[i, 1] = S.get_conductivity_zero_Temperature(0, 0, L_x, L_y, omega_values, Gamma, Omega)
-    sigma_yy[i, 0], sigma_yy[i, 1] = S.get_conductivity_zero_Temperature(1, 1, L_x, L_y, omega_values, Gamma, Omega)
+    K_xx[i, 0], K_xx[i, 1] = S.get_conductivity_zero_Temperature(0, 0, L_x, L_y, omega_values, Gamma, Omega)
+    K_yy[i, 0], K_yy[i, 1] = S.get_conductivity_zero_Temperature(1, 1, L_x, L_y, omega_values, Gamma, Omega)
     print(i)
     
 fig, ax = plt.subplots()
-ax.plot(B_values/Delta, sigma_xx[:,0], "-o",  label=r"$\sigma^{(L)}_{xx}$")
-ax.plot(B_values/Delta, sigma_xx[:,1], "-o",  label=r"$\sigma^{(R)}_{xx}$")
-ax.plot(B_values/Delta, sigma_yy[:,0], "-o",  label=r"$\sigma^{(L)}_{yy}$")
-ax.plot(B_values/Delta, sigma_yy[:,1], "-o",  label=r"$\sigma^{(R)}_{yy}$")
+ax.plot(B_values/Delta, K_xx[:,0], "-o",  label=r"$K^{(L)}_{xx}$")
+ax.plot(B_values/Delta, K_xx[:,1], "-o",  label=r"$K^{(R)}_{xx}$")
+ax.plot(B_values/Delta, K_yy[:,0], "-o",  label=r"$K^{(L)}_{yy}$")
+ax.plot(B_values/Delta, K_yy[:,1], "-o",  label=r"$K^{(R)}_{yy}$")
 
 ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
              +r"; $\Delta=$" + f"{Delta}"
@@ -107,7 +107,7 @@ ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
              +f"; B={B:.2}" + r"; $\mu$"+f"={mu}"
              +r"; $w_0$"+f"={w_0}")
 ax.set_xlabel(r"$\frac{B_y}{\Delta}$")
-ax.set_ylabel(r"$\sigma(B_y)$")
+ax.set_ylabel(r"$\K(B_y)$")
 ax.legend()
 plt.tight_layout()
 
@@ -117,6 +117,6 @@ from pathlib import Path
 data_folder = Path("Data/")
 
 file_to_open = data_folder / "K_alpha_alpha_mu_-40_L=200.npz"
-np.savez(file_to_open , sigma_xx=sigma_xx,
-         sigma_yy=sigma_yy, **params,
+np.savez(file_to_open , K_xx=K_xx,
+         K_yy=K_yy, **params,
          B_values=B_values)

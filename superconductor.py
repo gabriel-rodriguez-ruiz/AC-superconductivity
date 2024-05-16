@@ -66,6 +66,16 @@ class Superconductor():
                   - 2*self.Lambda*np.cos(k_y) * np.kron(tau_z, sigma_x)
                   )
         return [v_k_x, v_k_y]
+    def get_dv_dk(self, k_x, k_y,):
+        v_k_x = (
+                  2*self.w_0*np.cos(k_x) * np.kron(tau_z, sigma_0)
+                  + 2*self.Lambda*np.sin(k_x) * np.kron(tau_0, sigma_y)
+                  )
+        v_k_y = (
+                  2*self.w_0*np.cos(k_y) * np.kron(tau_z, sigma_0)
+                  - 2*self.Lambda*np.sin(k_y) * np.kron(tau_0, sigma_x)
+                  )
+        return [v_k_x, v_k_y]
     def get_Hamiltonian(self, k_x, k_y):
         r""" Periodic Hamiltonian in x and y with flux.
         
@@ -203,7 +213,7 @@ class Superconductor():
                                          len(omega_values)), dtype=complex)
         for i, k_x in enumerate(k_x_values):
             for j, k_y in enumerate(k_y_values):
-                epsilon = self.get_epsilon(k_x, k_y)
+                dv_dk = self.get_dv_dk(k_x, k_y)
                 v = self.get_velocity(k_x, k_y)
                 for k, omega in enumerate(omega_values):
                     rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
@@ -216,34 +226,41 @@ class Superconductor():
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   epsilon[alpha] @ rho
-                                                                   - 1/2* v[alpha] @ (G_plus_Omega
-                                                                                      + G_minus_Omega
-                                                                                      + G_plus_Omega_dagger
-                                                                                      + G_minus_Omega_dagger)
-                                                                                       @ v[beta] @ rho
+                                                                   dv_dk[alpha] @ rho
+                                                                   + 1/2*(
+                                                                          (G_plus_Omega
+                                                                           + G_minus_Omega)
+                                                                          @ v[alpha] @ np.kron(tau_z, sigma_0) @ rho
+                                                                          + rho @ v[alpha] @ np.kron(tau_z, sigma_0) 
+                                                                          (G_plus_Omega_dagger
+                                                                             + G_minus_Omega_dagger)
+                                                                          )
+                                                                           @ v[beta] @ np.kron(tau_z, sigma_0) 
                                                                    )
                                                         )
                     else:
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   - 1/2*(v[alpha] @ (G_plus_Omega
-                                                                                      + G_minus_Omega) @ v[beta]              
-                                                                          + v[beta] @ (G_plus_Omega_dagger
-                                                                                       + G_minus_Omega_dagger
-                                                                                       ) @ v[alpha]
-                                                                          ) @ rho
-                                                                   )
+                                                                   1/2*(
+                                                                          (G_plus_Omega
+                                                                           + G_minus_Omega)
+                                                                          @ v[alpha] @ np.kron(tau_z, sigma_0) @ rho
+                                                                          + rho @ v[alpha] @ np.kron(tau_z, sigma_0) 
+                                                                          (G_plus_Omega_dagger
+                                                                             + G_minus_Omega_dagger)
+                                                                          )
+                                                                           @ v[beta] @ np.kron(tau_z, sigma_0)
+                                                                    )
                                                         )
                     integrand_ressistive[i, j, k] = (
                                                      1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   1j/2*(v[alpha] @ (G_plus_Omega
-                                                                                     - G_minus_Omega) @ v[beta]              
-                                                                         - v[beta] @ (G_plus_Omega_dagger
+                                                                   1j/2*(v[alpha] @ np.kron(tau_z, sigma_0) @ (G_plus_Omega
+                                                                                     - G_minus_Omega) @ v[beta] @ np.kron(tau_z, sigma_0)              
+                                                                         - v[beta] @ np.kron(tau_z, sigma_0) @ (G_plus_Omega_dagger
                                                                                       - G_minus_Omega_dagger
-                                                                                       ) @ v[alpha]
+                                                                                       ) @ v[alpha] @ np.kron(tau_z, sigma_0)
                                                                           ) @ rho
                                                                 )
                                                      )

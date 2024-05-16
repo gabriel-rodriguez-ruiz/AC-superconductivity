@@ -39,3 +39,11 @@ rho = sp.I * (G_retarded - G_advanced)
 # Real = 1/2 * (G_retarded + G_advanced)
 # rho_2 = -2*sp.im(G_retarded)
 rho_3 = G_retarded * 2*eta*TensorProduct(tau_0, sigma_0) * G_advanced
+
+#%%
+
+G = sp.Matrix(sp.MatrixSymbol("G", 2, 2))
+rho = sp.Matrix(sp.MatrixSymbol("rho", 2, 2))
+v = sp.Matrix((sp.MatrixSymbol("v", 2, 2)))
+
+T = sp.Trace((G*v*tau_z*rho + rho*v*tau_z*G.conjugate().transpose())*v*tau_z)
