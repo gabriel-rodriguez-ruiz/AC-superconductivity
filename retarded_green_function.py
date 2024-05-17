@@ -42,8 +42,24 @@ rho_3 = G_retarded * 2*eta*TensorProduct(tau_0, sigma_0) * G_advanced
 
 #%%
 
-G = sp.Matrix(sp.MatrixSymbol("G", 2, 2))
-rho = sp.Matrix(sp.MatrixSymbol("rho", 2, 2))
-v = sp.Matrix((sp.MatrixSymbol("v", 2, 2)))
+G = sp.Matrix(2, 2, lambda i,j: sp.MatrixSymbol("G", 2, 2)[min(i,j), max(i,j)])
+rho = sp.Matrix(2, 2, lambda i,j: sp.MatrixSymbol("rho", 2, 2)[min(i,j), max(i,j)])
+# G = sp.Matrix(4, 4, lambda i,j: sp.MatrixSymbol("G", 4, 4)[min(i,j), max(i,j)])
+# rho = sp.Matrix(4, 4, lambda i,j: sp.MatrixSymbol("rho", 4, 4)[min(i,j), max(i,j)])
 
-T = sp.Trace((G*v*tau_z*rho + rho*v*tau_z*G.conjugate().transpose())*v*tau_z)
+
+# rho = sp.eye(4,4)
+# rho = TensorProduct(tau_z, sigma_0)
+# v = sp.Matrix(2, 2, lambda i,j: sp.MatrixSymbol("v", 2, 2)[min(i,j), max(i,j)])
+# v = TensorProduct(tau_z, sigma_0)+TensorProduct(tau_0, sigma_x)
+# v = sp.MatrixSymbol("v", 2,2)
+# v = sp.Matrix([[v[0,0], 0],
+#                 [0, v[1,1]]])
+v = tau_0
+P = sp.Trace(v*tau_z*(G*v*tau_z + G.transpose()*v*tau_z)*rho)
+D = -sp.Trace(v*(G*v + G.transpose()*v)*rho)
+
+# T = sp.Trace((G*v*TensorProduct(tau_z, sigma_0)*rho + rho*v*TensorProduct(tau_z, sigma_0)*G.transpose())*v*TensorProduct(tau_z, sigma_0))
+# Q = sp.Trace((G*v*rho + rho*v*G.transpose())*v)
+
+sp.simplify(D+P)

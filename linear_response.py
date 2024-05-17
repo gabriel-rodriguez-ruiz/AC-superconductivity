@@ -9,17 +9,17 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 100
-L_y = 100
+L_x = 10
+L_y = 10
 w_0 = 10
-Delta = 0
+Delta = 0.2
 mu = -40
 theta = np.pi/2
 B = 0
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
-Omega = 0.1
+Omega = 0
 t = 0
 A_x = 0
 A_y = 0
@@ -34,23 +34,29 @@ Gamma = 0.1
 alpha = 0
 beta = 0
 Beta = 1000
-
-omega_values = np.linspace(-45, 0, 100)
+def get_Fermi_function(self, omega):
+    """ Fermi function"""
+    return 1/(1 + np.exp(self.beta*omega))
+omega_values = np.linspace(-45, 0, 10)
 
 S = Superconductor(**params)
 
 # S.plot_spectrum(k_x_values, k_y_values)
 # S.plot_spectral_density(omega_values,
-#                         k_x=-np.pi, k_y=-np.pi, Gamma=Gamma)
+#                         k_x=0, k_y=0, Gamma=Gamma)
                           
 
 #%% DC-conductivity
-sigma = S.get_conductivity_zero_Temperature(alpha, beta, L_x, L_y, omega_values, Gamma, Omega)
-print(sigma)
+part = "paramagnetic"
+fermi_function = lambda omega: 1/(1 + np.exp(Beta*omega))
+fermi_function = lambda omega: 1 - np.heaviside(omega, 1)
+
+K = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part)
+print(K)
 
 #%% Convergence in size
 
-L_values = np.linspace(10, 100, 20)
+L_values = np.linspace(10, 100, 10)
 sigma = np.zeros((len(L_values), 2), dtype=complex)
 for i, L in enumerate(L_values):
     L_x = L
@@ -62,7 +68,7 @@ fig, ax = plt.subplots()
 ax.plot(L_values, np.real(sigma[:, 0]), "o", label="Real part")
 ax.plot(L_values, np.imag(sigma[:, 0]), "o", label="Imaginary part")
 ax.set_xlabel(r"$L$")
-ax.set_ylabel(r"$\sigma(\omega=-10, \Omega=0)$")
+ax.set_ylabel(r"$K_{xx}(\Omega=0)$")
 plt.legend()
 
 #%% Conductivity vs omega
@@ -107,7 +113,7 @@ ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
              +f"; B={B:.2}" + r"; $\mu$"+f"={mu}"
              +r"; $w_0$"+f"={w_0}")
 ax.set_xlabel(r"$\frac{B_y}{\Delta}$")
-ax.set_ylabel(r"$\K(B_y)$")
+ax.set_ylabel(r"$K(B_y)$")
 ax.legend()
 plt.tight_layout()
 
