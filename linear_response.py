@@ -12,14 +12,14 @@ import matplotlib.pyplot as plt
 L_x = 100
 L_y = 100
 w_0 = 10
-Delta = 0
+Delta = 0.2
 mu = -40
 theta = np.pi/2
 B = 0
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
-Omega = 0.1
+Omega = 0
 t = 0
 A_x = 0
 A_y = 0
