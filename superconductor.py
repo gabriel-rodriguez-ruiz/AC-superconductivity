@@ -56,16 +56,16 @@ class Superconductor():
                         - 2*self.Lambda*np.sin(k_y) * np.kron(tau_z, sigma_x)
                         )
         return [epsilon_k_x, epsilon_k_y]
-    def get_velocity(self, k_x, k_y,):
-        v_k_x = (
-                  2*self.w_0*np.sin(k_x) * np.kron(tau_z, sigma_0)
-                  + 2*self.Lambda*np.cos(k_x) * np.kron(tau_z, sigma_y)
-                  )
-        v_k_y = (
-                  2*self.w_0*np.sin(k_y) * np.kron(tau_z, sigma_0)
-                  - 2*self.Lambda*np.cos(k_y) * np.kron(tau_z, sigma_x)
-                  )
-        return [v_k_x, v_k_y]
+    def get_velocity(self, k_x, k_y):
+        epsilon_k_x = (
+                        2*self.w_0*np.sin(k_x) * np.kron(tau_z, sigma_0)
+                        + 2*self.Lambda*np.sin(k_x) * np.kron(tau_z, sigma_y)
+                        )
+        epsilon_k_y = (
+                        -2*self.w_0*np.cos(k_y) * np.kron(tau_z, sigma_0)
+                        - 2*self.Lambda*np.sin(k_y) * np.kron(tau_z, sigma_x)
+                        )
+        return [epsilon_k_x, epsilon_k_y]
     def get_dv_dk(self, k_x, k_y,):
         v_k_x = (
                   2*self.w_0*np.cos(k_x) * np.kron(tau_z, sigma_0)
@@ -158,9 +158,6 @@ class Superconductor():
         G_k = self.get_Green_function(omega, k_x, k_y, Gamma)
         # return G_k @ (2*Gamma*np.kron(tau_0, sigma_0)) @ G_k.conj().T
         return 1j * (G_k - G_k.conj().T)
-    def get_Fermi_function(self, omega, beta):
-        """ Fermi function"""
-        return 1/(1 + np.exp(beta*omega))
     def get_Energy(self, k_x_values, k_y_values):
         energies = np.zeros((len(k_x_values), len(k_y_values),
                              4))
@@ -202,9 +199,22 @@ class Superconductor():
         fig.supylabel(r"$\hat{\rho}_{\mathbf{k}}(\omega)$")
         fig.suptitle(r"$(kx, ky)=$"+f"({np.round(k_x,2)}, {np.round(k_y,2)})")
         plt.tight_layout()
-    def get_conductivity(self, alpha, beta, L_x, L_y, omega_values, Gamma, Beta, Omega):
+    def get_response_function(self, alpha, beta, L_x, L_y, omega_values, Gamma, Fermi_function, Omega, part):
+        """Returns the response function element (alpha, beta)
+        Fermi function should be a function f(omega).
+        If part=0, it calculates the paramegnetic part.
+        If part=1, it calculates the diamagnetic and paramagentic
+        """
+        if part=="paramagnetic":
+            p = 1
+            d = 0
+        elif part=="diamagnetic":
+            p = 0
+            d = 1
+        else:
+            p = 1
+            d = 1
         dw = np.diff(omega_values)[0]
-        # dw = 1
         k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
         k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
         integrand_inductive = np.zeros((len(k_x_values), len(k_y_values),
@@ -221,37 +231,39 @@ class Superconductor():
                     G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
                     G_plus_Omega_dagger = G_plus_Omega.conj().T
                     G_minus_Omega_dagger = G_minus_Omega.conj().T
-                    fermi_function = self.get_Fermi_function(omega, Beta) 
+                    fermi_function = Fermi_function(omega)
                     if alpha==beta:
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   dv_dk[alpha] @ rho
-                                                                   + 1/2*(
-                                                                          (G_plus_Omega
-                                                                           + G_minus_Omega)
-                                                                          @ v[alpha] @ np.kron(tau_z, sigma_0) @ rho
-                                                                          + rho @ v[alpha] @ np.kron(tau_z, sigma_0) 
-                                                                          (G_plus_Omega_dagger
-                                                                             + G_minus_Omega_dagger)
-                                                                          )
-                                                                           @ v[beta] @ np.kron(tau_z, sigma_0) 
+                                                                   d * dv_dk[alpha] @ rho
+                                                                   + p * 1/2*v[beta] @ np.kron(tau_z, sigma_0) 
+                                                                   @(
+                                                                    (G_plus_Omega
+                                                                     + G_minus_Omega)
+                                                                    @ v[alpha] @ np.kron(tau_z, sigma_0) 
+                                                                    +  
+                                                                    (G_plus_Omega_dagger
+                                                                       + G_minus_Omega_dagger)
+                                                                    @ v[alpha] @ np.kron(tau_z, sigma_0)
+                                                                    ) @ rho
                                                                    )
                                                         )
                     else:
                         integrand_inductive[i, j, k] = (
                                                         1/(2*np.pi) * fermi_function
                                                         * np.trace(
-                                                                   1/2*(
-                                                                          (G_plus_Omega
-                                                                           + G_minus_Omega)
-                                                                          @ v[alpha] @ np.kron(tau_z, sigma_0) @ rho
-                                                                          + rho @ v[alpha] @ np.kron(tau_z, sigma_0) 
-                                                                          (G_plus_Omega_dagger
-                                                                             + G_minus_Omega_dagger)
-                                                                          )
-                                                                           @ v[beta] @ np.kron(tau_z, sigma_0)
-                                                                    )
+                                                                   p * 1/2*v[beta] @ np.kron(tau_z, sigma_0) 
+                                                                   @(
+                                                                    (G_plus_Omega
+                                                                     + G_minus_Omega)
+                                                                    @ v[alpha] @ np.kron(tau_z, sigma_0) 
+                                                                    +  
+                                                                    (G_plus_Omega_dagger
+                                                                       + G_minus_Omega_dagger)
+                                                                    @ v[alpha] @ np.kron(tau_z, sigma_0)
+                                                                    ) @ rho
+                                                                   )
                                                         )
                     integrand_ressistive[i, j, k] = (
                                                      1/(2*np.pi) * fermi_function
@@ -265,67 +277,7 @@ class Superconductor():
                                                                 )
                                                      )
         integral_inductive = np.sum(integrand_inductive, axis=2) * dw
-        conductivity_inductive = 1/(L_x*L_y) * np.sum(integral_inductive)
+        K_inductive = 1/(L_x*L_y) * np.sum(integral_inductive)
         integral_ressistive = np.sum(integrand_ressistive, axis=2) * dw
-        conductivity_ressistive = 1/(L_x*L_y) * np.sum(integral_ressistive)
-        return [conductivity_inductive, conductivity_ressistive]
-    def get_conductivity_zero_Temperature(self, alpha, beta, L_x, L_y, omega_values, Gamma, Omega):
-        dw = np.diff(omega_values)[0]
-        # dw = 1
-        k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
-        k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
-        integrand_inductive = np.zeros((len(k_x_values), len(k_y_values),
-                                        len(omega_values)), dtype=complex)
-        integrand_ressistive = np.zeros((len(k_x_values), len(k_y_values),
-                                         len(omega_values)), dtype=complex)
-        for i, k_x in enumerate(k_x_values):
-            for j, k_y in enumerate(k_y_values):
-                epsilon = self.get_epsilon(k_x, k_y)
-                v = self.get_velocity(k_x, k_y)
-                for k, omega in enumerate(omega_values):
-                    rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
-                    G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
-                    G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
-                    G_plus_Omega_dagger = G_plus_Omega.conj().T
-                    G_minus_Omega_dagger = G_minus_Omega.conj().T
-                    fermi_function = 1 - np.heaviside(omega, 0)
-                    if alpha==beta:
-                        integrand_inductive[i, j, k] = (
-                                                        1/(2*np.pi) * fermi_function
-                                                        * np.trace(
-                                                                   epsilon[alpha] @ rho
-                                                                   - 1/2* v[alpha] @ (G_plus_Omega
-                                                                                      + G_minus_Omega
-                                                                                      + G_plus_Omega_dagger
-                                                                                      + G_minus_Omega_dagger)
-                                                                                       @ v[beta] @ rho
-                                                                   )
-                                                        )
-                    else:
-                        integrand_inductive[i, j, k] = (
-                                                        1/(2*np.pi) * fermi_function
-                                                        * np.trace(
-                                                                   - 1/2*(v[alpha] @ (G_plus_Omega
-                                                                                      + G_minus_Omega) @ v[beta]              
-                                                                          + v[beta] @ (G_plus_Omega_dagger
-                                                                                       + G_minus_Omega_dagger
-                                                                                       ) @ v[alpha]
-                                                                          ) @ rho
-                                                                   )
-                                                        )
-                    integrand_ressistive[i, j, k] = (
-                                                     1/(2*np.pi) * fermi_function
-                                                        * np.trace(
-                                                                   1j/2*(v[alpha] @ (G_plus_Omega
-                                                                                     - G_minus_Omega) @ v[beta]              
-                                                                         - v[beta] @ (G_plus_Omega_dagger
-                                                                                      - G_minus_Omega_dagger
-                                                                                       ) @ v[alpha]
-                                                                          ) @ rho
-                                                                )
-                                                     )
-        integral_inductive = np.sum(integrand_inductive, axis=2) * dw
-        conductivity_inductive = 1/(L_x*L_y) * np.sum(integral_inductive)
-        integral_ressistive = np.sum(integrand_ressistive, axis=2) * dw
-        conductivity_ressistive = 1/(L_x*L_y) * np.sum(integral_ressistive)
-        return [conductivity_inductive, conductivity_ressistive]
+        K_ressistive = 1/(L_x*L_y) * np.sum(integral_ressistive)
+        return [K_inductive, K_ressistive]
