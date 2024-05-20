@@ -9,6 +9,7 @@ Created on Mon Apr 29 16:12:01 2024
 import numpy as np
 from pauli_matrices import tau_0, sigma_0, tau_z, sigma_x, sigma_y, tau_x
 import matplotlib.pyplot as plt
+import scipy
 
 class Superconductor():
     r"""
@@ -66,16 +67,6 @@ class Superconductor():
                    + 2*self.Lambda*np.sin(k_y) * np.kron(tau_z, sigma_x)
                    )
         return [v_1_k_x, v_1_k_y]
-    def get_dv_dk(self, k_x, k_y,):
-        v_k_x = (
-                  2*self.w_0*np.cos(k_x) * np.kron(tau_z, sigma_0)
-                  + 2*self.Lambda*np.sin(k_x) * np.kron(tau_0, sigma_y)
-                  )
-        v_k_y = (
-                  2*self.w_0*np.cos(k_y) * np.kron(tau_z, sigma_0)
-                  - 2*self.Lambda*np.sin(k_y) * np.kron(tau_0, sigma_x)
-                  )
-        return [v_k_x, v_k_y]
     def get_Hamiltonian(self, k_x, k_y):
         r""" Periodic Hamiltonian in x and y with flux.
         
@@ -136,13 +127,13 @@ class Superconductor():
                              - H_k
                              + 1j * Gamma * np.kron(tau_0, sigma_0)
                              )
-    def get_spectral_density(self, omega, k_x, k_y, Gamma):
+    def get_spectral_density(self, omega_values, k_x, k_y, Gamma):
         """ Returns the spectral density.
 
         Parameters
         ----------
-        omega : float
-            Frequency.
+        omega_values : float or ndarray
+            Frequency values.
         k_x : float
             Momentum in x direction.
         k_y : float
@@ -155,18 +146,28 @@ class Superconductor():
         ndarray
             Spectral density.
         """
-        G_k = self.get_Green_function(omega, k_x, k_y, Gamma)
-        # return G_k @ (2*Gamma*np.kron(tau_0, sigma_0)) @ G_k.conj().T
-        return 1j * (G_k - G_k.conj().T)
+        if np.size(omega_values)==1:
+            G_k = self.get_Green_function(omega_values, k_x, k_y, Gamma)
+            # return G_k @ (2*Gamma*np.kron(tau_0, sigma_0)) @ G_k.conj().T
+            return 1j * (G_k - G_k.conj().T)
+        else:
+            rho = np.zeros((len(omega_values), 4 , 4), dtype=complex)
+            for i, omega in enumerate(omega_values):
+                rho[i, :, :] = self.get_spectral_density(omega, k_x, k_y, Gamma)
+            return rho
     def get_Energy(self, k_x_values, k_y_values):
-        energies = np.zeros((len(k_x_values), len(k_y_values),
-                             4))
-        for i, k_x in enumerate(k_x_values):
-            for j, k_y in enumerate(k_y_values):
-                for k in range(4):
-                    H = self.get_Hamiltonian(k_x, k_y)
-                    energies[i, j, k] = np.linalg.eigvalsh(H)[k]
-        return energies
+        if np.size([k_x_values, k_y_values])==2:
+            H = self.get_Hamiltonian(k_x_values, k_y_values)
+            return np.linalg.eigvalsh(H)
+        else:
+            energies = np.zeros((len(k_x_values), len(k_y_values),
+                                 4))
+            for i, k_x in enumerate(k_x_values):
+                for j, k_y in enumerate(k_y_values):
+                    for k in range(4):
+                        H = self.get_Hamiltonian(k_x, k_y)
+                        energies[i, j, k] = np.linalg.eigvalsh(H)[k]
+            return energies
     def plot_spectrum(self, k_x_values, k_y_values):
         E = self.get_Energy(k_x_values, k_y_values)
         L_y = len(k_y_values)//2
@@ -188,9 +189,7 @@ class Superconductor():
         ax2.set_ylabel(r"$k_y$")
         plt.tight_layout()
     def plot_spectral_density(self, omega_values, k_x, k_y, Gamma):
-        rho = np.zeros((len(omega_values), 4 , 4), dtype=complex)
-        for i, omega in enumerate(omega_values):
-            rho[i, :, :] = self.get_spectral_density(omega, k_x, k_y, Gamma)
+        rho = self.get_spectral_density(omega_values, k_x, k_y, Gamma)
         fig, axs = plt.subplots(4, 4)
         for i in range(4):
             for j in range(4):
@@ -199,21 +198,16 @@ class Superconductor():
         fig.supylabel(r"$\hat{\rho}_{\mathbf{k}}(\omega)$")
         fig.suptitle(r"$(kx, ky)=$"+f"({np.round(k_x,2)}, {np.round(k_y,2)})")
         plt.tight_layout()
+    def integrate_spectral_density(self, k_x, k_y, a, b, Gamma):
+        f = self.get_spectral_density
+        return scipy.integrate.quad_vec(f, a, b, args=(k_x, k_y, Gamma))[0]
     def get_response_function(self, alpha, beta, L_x, L_y, omega_values, Gamma, Fermi_function, Omega, part="total"):
         """Returns the response function element (alpha, beta)
         Fermi function should be a function f(omega).
         If part=0, it calculates the paramegnetic part.
         If part=1, it calculates the diamagnetic and paramagentic
         """
-        if part=="paramagnetic":
-            p = 1
-            d = 0
-        elif part=="diamagnetic":
-            p = 0
-            d = 1
-        else:
-            p = 1
-            d = 1
+        d, p = self.__select_part(part)
         dw = np.diff(omega_values)[0]
         k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
         k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
@@ -288,4 +282,217 @@ class Superconductor():
         K_inductive = 1/(L_x*L_y) * np.sum(integral_inductive)
         integral_ressistive = np.sum(integrand_ressistive, axis=2) * dw
         K_ressistive = 1/(L_x*L_y) * np.sum(integral_ressistive)
+        return [K_inductive, K_ressistive]
+    def __select_part(self, part):
+        if part=="paramagnetic":
+            p = 1
+            d = 0
+        elif part=="diamagnetic":
+            p = 0
+            d = 1
+        else:
+            p = 1
+            d = 1
+        return [d, p]
+    def get_integrand_omega_inductive(self, omega, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total"):
+        r"""Returns the integrand of the response function element (alpha, beta)
+        Fermi function should be a function f(omega).
+        If part=0, it calculates the paramegnetic part.
+        If part=1, it calculates the diamagnetic and paramagnetic
+        
+        .. math::
+            \frac{1}{2}\sum_{\mathbf{k}} \int \frac{d\omega}{2\pi} f(\omega) Tr\left( \hat{\rho}^{0}_{\mathbf{k}}(\omega) \hat{v}^{(1)}_{k_\alpha}(t)  \right)
+            
+        """
+        d, p = self.__select_part(part)
+        k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
+        k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
+        integrand_inductive = np.zeros((len(k_x_values), len(k_y_values)),
+                                        dtype=complex)
+        for i, k_x in enumerate(k_x_values):
+            for j, k_y in enumerate(k_y_values):
+                v_0 = self.get_velocity_0(k_x, k_y)
+                v_1 = self.get_velocity_1(k_x, k_y)
+                rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+                G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+                G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+                G_plus_Omega_dagger = G_plus_Omega.conj().T
+                G_minus_Omega_dagger = G_minus_Omega.conj().T
+                fermi_function = Fermi_function(omega)
+                if alpha==beta:
+                    integrand_inductive[i, j] = (
+                        1/(2*np.pi) * fermi_function
+                            * np.trace(
+                                       d * rho @ v_1[alpha]
+                                       + p * 1/2 * rho
+                                       @ (
+                                          v_0[alpha]
+                                          @ (G_plus_Omega
+                                             + G_minus_Omega)
+                                          @ v_0[beta] 
+                                          + v_0[beta]
+                                          @ (G_plus_Omega_dagger
+                                             + G_minus_Omega_dagger)
+                                          @ v_0[alpha]
+                                          )
+                                       )
+                        )
+                else:
+                    integrand_inductive[i, j] = (
+                        1/(2*np.pi) * fermi_function
+                            * np.trace(
+                                       d * rho @ v_1[alpha]
+                                       + p * 1/2 * rho
+                                       @ (
+                                          v_0[alpha]
+                                          @ (G_plus_Omega
+                                             + G_minus_Omega)
+                                          @ v_0[beta] 
+                                          + v_0[beta]
+                                          @ (G_plus_Omega_dagger
+                                             + G_minus_Omega_dagger)
+                                          @ v_0[alpha]
+                                          )
+                                       )
+                        )
+        return integrand_inductive
+    def get_integrand_omega_ressistive(self, omega, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total"):
+        r"""Returns the integrand of the response function element (alpha, beta)
+        Fermi function should be a function f(omega).
+        If part=0, it calculates the paramegnetic part.
+        If part=1, it calculates the diamagnetic and paramagnetic
+        
+        .. math::
+            \frac{1}{2}\sum_{\mathbf{k}} \int \frac{d\omega}{2\pi} f(\omega) Tr\left( \hat{\rho}^{0}_{\mathbf{k}}(\omega) \hat{v}^{(1)}_{k_\alpha}(t)  \right)
+            
+        """
+        d, p = self.__select_part(part)
+        k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
+        k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
+        integrand_ressistive = np.zeros((len(k_x_values), len(k_y_values)),
+                                        dtype=complex)
+        for i, k_x in enumerate(k_x_values):
+            for j, k_y in enumerate(k_y_values):
+                v_0 = self.get_velocity_0(k_x, k_y)
+                rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+                G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+                G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+                G_plus_Omega_dagger = G_plus_Omega.conj().T
+                G_minus_Omega_dagger = G_minus_Omega.conj().T
+                fermi_function = Fermi_function(omega)
+                integrand_ressistive[i, j] = (
+                    1/(2*np.pi) * fermi_function
+                       * np.trace(
+                                  1j/2 * rho
+                                  @ (
+                                     v_0[alpha]
+                                     @ (G_plus_Omega
+                                        - G_minus_Omega)
+                                     @ v_0[beta]              
+                                     - v_0[beta]
+                                     @ (G_plus_Omega_dagger
+                                        - G_minus_Omega_dagger)
+                                     @ v_0[alpha]
+                                     )
+                                  )
+                    )
+        return integrand_ressistive
+    def get_integrand_omega_k_inductive(self, omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total"):
+        r"""Returns the integrand of the response function element (alpha, beta)
+        at omega and (k_x, k_y)
+        """
+        d, p = self.__select_part(part)    
+        v_0 = self.get_velocity_0(k_x, k_y)
+        v_1 = self.get_velocity_1(k_x, k_y)
+        rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+        G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+        G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+        G_plus_Omega_dagger = G_plus_Omega.conj().T
+        G_minus_Omega_dagger = G_minus_Omega.conj().T
+        fermi_function = Fermi_function(omega)
+        if alpha==beta:
+            integrand_inductive = (
+                1/(2*np.pi) * fermi_function
+                    * np.trace(
+                               d * rho @ v_1[alpha]
+                               + p * 1/2 * rho
+                               @ (
+                                  v_0[alpha]
+                                  @ (G_plus_Omega
+                                     + G_minus_Omega)
+                                  @ v_0[beta] 
+                                  + v_0[beta]
+                                  @ (G_plus_Omega_dagger
+                                     + G_minus_Omega_dagger)
+                                  @ v_0[alpha]
+                                  )
+                               )
+                )
+        else:
+            integrand_inductive = (
+                1/(2*np.pi) * fermi_function
+                    * np.trace(
+                               d * rho @ v_1[alpha]
+                               + p * 1/2 * rho
+                               @ (
+                                  v_0[alpha]
+                                  @ (G_plus_Omega
+                                     + G_minus_Omega)
+                                  @ v_0[beta] 
+                                  + v_0[beta]
+                                  @ (G_plus_Omega_dagger
+                                     + G_minus_Omega_dagger)
+                                  @ v_0[alpha]
+                                  )
+                               )
+                )
+        return integrand_inductive
+    def get_integrand_omega_k_ressistive(self, omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total"):
+        r"""Returns the integrand of the response function resistive element (alpha, beta)
+            for a given omega and (k_x, k_y)
+        """
+        v_0 = self.get_velocity_0(k_x, k_y)
+        rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+        G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+        G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+        G_plus_Omega_dagger = G_plus_Omega.conj().T
+        G_minus_Omega_dagger = G_minus_Omega.conj().T
+        fermi_function = Fermi_function(omega)
+        integrand_ressistive = (
+            1/(2*np.pi) * fermi_function
+               * np.trace(
+                          1j/2 * rho
+                          @ (
+                             v_0[alpha]
+                             @ (G_plus_Omega
+                                - G_minus_Omega)
+                             @ v_0[beta]              
+                             - v_0[beta]
+                             @ (G_plus_Omega_dagger
+                                - G_minus_Omega_dagger)
+                             @ v_0[alpha]
+                             )
+                          )
+            )
+        return integrand_ressistive
+    def get_response_function_quad(self, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total"):
+        inductive_integrand = self.get_integrand_omega_k_inductive
+        ressistive_integrand = self.get_integrand_omega_k_ressistive
+        a = -np.inf#-45
+        b = 0
+        k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
+        k_y_values = 2*np.pi/L_x*np.arange(0, L_y)
+        K_inductive_k = np.zeros((len(k_x_values), len(k_y_values)),
+                                dtype=complex)
+        K_ressistive_k = np.zeros((len(k_x_values), len(k_y_values)),
+                                dtype=complex)
+        for i, k_x in enumerate(k_x_values):
+            for j, k_y in enumerate(k_y_values):
+                E_k = self.get_Energy(k_x, k_y)
+                poles = list(E_k[np.where(E_k<=0)])
+                params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
+                K_inductive_k[i, j] = scipy.integrate.quad_vec(inductive_integrand, a, b, args=params, points=poles, workers=-1)[0]
+                K_ressistive_k[i, j] = scipy.integrate.quad_vec(ressistive_integrand, a, b, args=params, points=poles, workers=-1)[0]
+        K_inductive = 1/(L_x*L_y) * np.sum(K_inductive_k)
+        K_ressistive = 1/(L_x*L_y) * np.sum(K_ressistive_k)
         return [K_inductive, K_ressistive]

@@ -9,10 +9,10 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 100
-L_y = 100
+L_x = 2
+L_y = 2
 w_0 = 10
-Delta = 0
+Delta = 0.2
 mu = -40
 theta = np.pi/2
 B = 0
@@ -35,22 +35,27 @@ alpha = 0
 beta = 0
 Beta = 1000
 
-omega_values = np.linspace(-45, 0, 100)
+# omega_values = np.linspace(-45, 0, 100)
 
-part = "total"#"diamagnetic"#"paramagnetic"
+# part = "paramagnetic"
+# part = "diamagnetic"
+part="total"
 # fermi_function = lambda omega: 1/(1 + np.exp(Beta*omega))
-fermi_function = lambda omega: 1 - np.heaviside(omega, 1)
+# fermi_function = lambda omega: 1 - np.heaviside(omega, 1)
+def fermi_function(omega):
+    return 1 - np.heaviside(omega, 1)
 
 S = Superconductor(**params)
 
-# S.plot_spectrum(k_x_values, k_y_values)
+# E_k = S.plot_spectrum(k_x_values, k_y_values)
 # S.plot_spectral_density(omega_values,
-#                         k_x=0, k_y=0, Gamma=Gamma)
+#                         k_x=-np.pi/2, k_y=-np.pi/2, Gamma=Gamma)
                           
 
 #%% DC-conductivity
 
-K = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part)
+# K = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part)
+K = S.get_response_function_quad(alpha, beta, L_x, L_y, Gamma, fermi_function, Omega, part)
 print(K)
 
 #%% Convergence in size
@@ -60,7 +65,7 @@ K = np.zeros((len(L_values), 2), dtype=complex)
 for i, L in enumerate(L_values):
     L_x = L
     L_y = L
-    K[i, :] = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part="total")
+    K[i, :] = S.get_response_function_quad(alpha, beta, L_x, L_y, Gamma, fermi_function, Omega, part)
     print(i)
     
 fig, ax = plt.subplots()
@@ -68,6 +73,12 @@ ax.plot(L_values, np.real(K[:, 0]), "o", label="Real part")
 ax.plot(L_values, np.imag(K[:, 0]), "o", label="Imaginary part")
 ax.set_xlabel(r"$L$")
 ax.set_ylabel(r"$K_{xx}(\Omega=0)$")
+ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
+             +r"; $\Delta=$" + f"{Delta}"
+             +r"; $\theta=$" + f"{theta:.3}"
+             +f"; B={np.round(B, 2)}" + r"; $\mu$"+f"={mu}"
+             +r"; $w_0$"+f"={w_0}")
+ax.annotate(f"{part}", (0.5, 0.75), xycoords="figure fraction")
 plt.legend()
 
 #%% Conductivity vs omega
