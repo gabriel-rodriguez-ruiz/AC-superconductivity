@@ -9,8 +9,8 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 2
-L_y = 2
+L_x = 100
+L_y = 100
 w_0 = 10
 Delta = 0.2
 mu = -40
@@ -99,7 +99,7 @@ ax.set_ylabel(r"$\sigma(\omega, \Omega=0)$")
 plt.legend()
 
 #%% Conductivity vs B
-B_values = np.linspace(0, Delta, 10)
+B_values = np.linspace(0, 3*Delta, 10)
 
 K_xx = np.zeros((len(B_values), 2), dtype=complex)
 K_yy = np.zeros((len(B_values), 2), dtype=complex)
@@ -107,8 +107,8 @@ n = np.zeros(len(B_values))
 for i, B in enumerate(B_values):
     S.B_x = B * np.cos(theta)
     S.B_y = B * np.sin(theta)
-    K_xx[i, 0], K_xx[i, 1] = S.get_conductivity_zero_Temperature(0, 0, L_x, L_y, omega_values, Gamma, Omega)
-    K_yy[i, 0], K_yy[i, 1] = S.get_conductivity_zero_Temperature(1, 1, L_x, L_y, omega_values, Gamma, Omega)
+    K_xx[i, 0], K_xx[i, 1] = S.get_response_function_quad(0, 0, L_x, L_y, Gamma, fermi_function, Omega, "total")
+    K_yy[i, 0], K_yy[i, 1] = S.get_response_function_quad(1, 1, L_x, L_y, Gamma, fermi_function, Omega, "total")
     print(i)
     
 fig, ax = plt.subplots()
