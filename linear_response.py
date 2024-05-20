@@ -9,10 +9,10 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 10
-L_y = 10
+L_x = 100
+L_y = 100
 w_0 = 10
-Delta = 0.2
+Delta = 0
 mu = -40
 theta = np.pi/2
 B = 0
@@ -34,10 +34,12 @@ Gamma = 0.1
 alpha = 0
 beta = 0
 Beta = 1000
-def get_Fermi_function(self, omega):
-    """ Fermi function"""
-    return 1/(1 + np.exp(self.beta*omega))
+
 omega_values = np.linspace(-45, 0, 10)
+
+part = "total"#"diamagnetic"#"paramagnetic"
+# fermi_function = lambda omega: 1/(1 + np.exp(Beta*omega))
+fermi_function = lambda omega: 1 - np.heaviside(omega, 1)
 
 S = Superconductor(**params)
 
@@ -47,9 +49,6 @@ S = Superconductor(**params)
                           
 
 #%% DC-conductivity
-part = "paramagnetic"
-fermi_function = lambda omega: 1/(1 + np.exp(Beta*omega))
-fermi_function = lambda omega: 1 - np.heaviside(omega, 1)
 
 K = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part)
 print(K)
@@ -57,16 +56,16 @@ print(K)
 #%% Convergence in size
 
 L_values = np.linspace(10, 100, 10)
-sigma = np.zeros((len(L_values), 2), dtype=complex)
+K = np.zeros((len(L_values), 2), dtype=complex)
 for i, L in enumerate(L_values):
     L_x = L
     L_y = L
-    sigma[i, :] = S.get_conductivity_zero_Temperature(alpha, beta, L_x, L_y, omega_values, Gamma, Omega)
+    K[i, :] = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part="total")
     print(i)
     
 fig, ax = plt.subplots()
-ax.plot(L_values, np.real(sigma[:, 0]), "o", label="Real part")
-ax.plot(L_values, np.imag(sigma[:, 0]), "o", label="Imaginary part")
+ax.plot(L_values, np.real(K[:, 0]), "o", label="Real part")
+ax.plot(L_values, np.imag(K[:, 0]), "o", label="Imaginary part")
 ax.set_xlabel(r"$L$")
 ax.set_ylabel(r"$K_{xx}(\Omega=0)$")
 plt.legend()
