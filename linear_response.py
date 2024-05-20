@@ -35,7 +35,7 @@ alpha = 0
 beta = 0
 Beta = 1000
 
-omega_values = np.linspace(-45, 0, 10)
+omega_values = np.linspace(-45, 0, 100)
 
 part = "total"#"diamagnetic"#"paramagnetic"
 # fermi_function = lambda omega: 1/(1 + np.exp(Beta*omega))
