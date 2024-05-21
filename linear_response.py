@@ -9,10 +9,10 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 
-L_x = 100
-L_y = 100
+L_x = 3
+L_y = 3
 w_0 = 10
-Delta = 0.2
+Delta = 0
 mu = -40
 theta = np.pi/2
 B = 0
@@ -39,11 +39,11 @@ Beta = 1000
 
 # part = "paramagnetic"
 # part = "diamagnetic"
-part="total"
+part = "total"
 # fermi_function = lambda omega: 1/(1 + np.exp(Beta*omega))
 # fermi_function = lambda omega: 1 - np.heaviside(omega, 1)
 def fermi_function(omega):
-    return 1 - np.heaviside(omega, 1)
+    return np.heaviside(-omega, 1)
 
 S = Superconductor(**params)
 
@@ -132,7 +132,11 @@ from pathlib import Path
 
 data_folder = Path("Data/")
 
-file_to_open = data_folder / "K_alpha_alpha_mu_-40_L=200.npz"
-np.savez(file_to_open , K_xx=K_xx,
-         K_yy=K_yy, **params,
-         B_values=B_values)
+# file_to_open = data_folder / "K_alpha_alpha_quad_mu_-40_L=10-100.npz"
+# np.savez(file_to_open , K_xx=K_xx,
+#          K_yy=K_yy, **params,
+#          B_values=B_values)
+
+file_to_open = data_folder / "K_alpha_alpha_quad_mu_-40_L=10-100_total.npz"
+np.savez(file_to_open , K=K, **params, L_values=L_values,
+         part=part)
