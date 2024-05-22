@@ -403,8 +403,10 @@ class Superconductor():
         """
         d, p = self.__select_part(part)    
         v_0 = self.get_velocity_0(k_x, k_y)
-        v_1 = self.get_velocity_1(k_x, k_y)
+        # v_1 = self.get_velocity_1(k_x, k_y)
         rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+        G = self.get_Green_function(omega, k_x, k_y, Gamma)
+        G_dagger = G.conj().T
         G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
         G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
         G_plus_Omega_dagger = G_plus_Omega.conj().T
@@ -414,7 +416,16 @@ class Superconductor():
             integrand_inductive = (
                 1/(2*np.pi) * fermi_function
                     * np.trace(
-                               d * rho @ v_1[alpha]
+                               # d * rho @ v_1[alpha]
+                               -d * rho 
+                               @ (
+                                  v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                  @ G
+                                  @ v_0[beta] @ np.kron(tau_z, sigma_0)
+                                  + v_0[beta] @ np.kron(tau_z, sigma_0)
+                                  @ G_dagger
+                                  @ v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                  )
                                + p * 1/2 * rho
                                @ (
                                   v_0[alpha]
@@ -432,7 +443,16 @@ class Superconductor():
             integrand_inductive = (
                 1/(2*np.pi) * fermi_function
                     * np.trace(
-                               d * rho @ v_1[alpha]
+                               # d * rho @ v_1[alpha]
+                               -d * rho 
+                               @ (
+                                  v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                  @ G
+                                  @ v_0[beta] @ np.kron(tau_z, sigma_0)
+                                  + v_0[beta] @ np.kron(tau_z, sigma_0)
+                                  @ G_dagger
+                                  @ v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                  )
                                + p * 1/2 * rho
                                @ (
                                   v_0[alpha]
@@ -475,7 +495,7 @@ class Superconductor():
                           )
             )
         return integrand_ressistive
-    def get_response_function_quad(self, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total"):
+    def get_response_function_quad(self, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total", epsrel=1e-08):
         inductive_integrand = self.get_integrand_omega_k_inductive
         ressistive_integrand = self.get_integrand_omega_k_ressistive
         a = -45
@@ -491,8 +511,8 @@ class Superconductor():
                 E_k = self.get_Energy(k_x, k_y)
                 poles = list(E_k[np.where(E_k<=0)])
                 params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
-                K_inductive_k[i, j] = scipy.integrate.quad_vec(inductive_integrand, a, b, args=params, points=poles)[0]
-                K_ressistive_k[i, j] = scipy.integrate.quad_vec(ressistive_integrand, a, b, args=params, points=poles)[0]
+                K_inductive_k[i, j] = scipy.integrate.quad_vec(inductive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
+                K_ressistive_k[i, j] = scipy.integrate.quad_vec(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
         K_inductive = 1/(L_x*L_y) * (np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]>0)
                                      + np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]<0)
                                      )
@@ -504,11 +524,11 @@ class Superconductor():
         at (k_x, k_y) as function of omega_values.
         """
         if np.size(omega_values)==1:
-            return self.get_integrand_omega_k_inductive(omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total")
+            return self.get_integrand_omega_k_inductive(omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
         else:
             integrand_inductive_k = np.zeros(len(omega_values), dtype=complex)
             for i, omega in enumerate(omega_values):
-                integrand_inductive_k[i] = self.get_integrand_omega_k_inductive(omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total")
+                integrand_inductive_k[i] = self.get_integrand_omega_k_inductive(omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
         return integrand_inductive_k
     def plot_integrand_k_inductive(self, omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total"):
         integrand_inductive_k = self.get_integrand_k_inductive(omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
@@ -518,4 +538,5 @@ class Superconductor():
         ax.set_xlabel(r"$\omega$")
         ax.set_ylabel(r"$K(k_x=$" + f"{np.round(k_x,2)}," + r"$k_y=$" + f"{np.round(k_y,2)})")
         # plt.yscale("log")
+        ax.set_title(f"{part}")
         plt.tight_layout()

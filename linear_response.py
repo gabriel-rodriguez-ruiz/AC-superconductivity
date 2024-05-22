@@ -20,9 +20,6 @@ B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
 Omega = 0
-t = 0
-A_x = 0
-A_y = 0
 params = {"w_0":w_0, "Delta":Delta,
           "mu":mu,
           "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
@@ -34,6 +31,7 @@ Gamma = 0.1
 alpha = 0
 beta = 0
 Beta = 1000
+epsrel=1e-01
 
 # omega_values = np.linspace(-45, 0, 100)
 
@@ -55,7 +53,7 @@ S = Superconductor(**params)
 #%% DC-conductivity
 
 # K = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part)
-K = S.get_response_function_quad(alpha, beta, L_x, L_y, Gamma, fermi_function, Omega, part)
+K = S.get_response_function_quad(alpha, beta, L_x, L_y, Gamma, fermi_function, Omega, part, epsrel)
 print(K)
 
 #%% Convergence in size
@@ -65,7 +63,7 @@ K = np.zeros((len(L_values), 2), dtype=complex)
 for i, L in enumerate(L_values):
     L_x = L
     L_y = L
-    K[i, :] = S.get_response_function_quad(alpha, beta, L_x, L_y, Gamma, fermi_function, Omega, part)
+    K[i, :] = S.get_response_function_quad(alpha, beta, L_x, L_y, Gamma, fermi_function, Omega, part, epsrel)
     print(i)
     
 fig, ax = plt.subplots()
