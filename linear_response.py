@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 L_x = 3
 L_y = 3
 w_0 = 10
-Delta = 0
+Delta = 0.2
 mu = -40
 theta = np.pi/2
 B = 0
