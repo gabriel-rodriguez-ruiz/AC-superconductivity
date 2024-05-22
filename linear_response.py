@@ -60,7 +60,7 @@ print(K)
 
 #%% Convergence in size
 
-L_values = np.linspace(10, 100, 10)
+L_values = np.linspace(1, 10, 10)
 K = np.zeros((len(L_values), 2), dtype=complex)
 for i, L in enumerate(L_values):
     L_x = L

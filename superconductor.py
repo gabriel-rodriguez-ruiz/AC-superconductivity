@@ -491,8 +491,31 @@ class Superconductor():
                 E_k = self.get_Energy(k_x, k_y)
                 poles = list(E_k[np.where(E_k<=0)])
                 params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
-                K_inductive_k[i, j] = scipy.integrate.quad_vec(inductive_integrand, a, b, args=params, points=poles, workers=-1)[0]
-                K_ressistive_k[i, j] = scipy.integrate.quad_vec(ressistive_integrand, a, b, args=params, points=poles, workers=-1)[0]
-        K_inductive = 1/(L_x*L_y) * np.sum(K_inductive_k)
+                K_inductive_k[i, j] = scipy.integrate.quad_vec(inductive_integrand, a, b, args=params, points=poles)[0]
+                K_ressistive_k[i, j] = scipy.integrate.quad_vec(ressistive_integrand, a, b, args=params, points=poles)[0]
+        K_inductive = 1/(L_x*L_y) * (np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]>0)
+                                     + np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]<0)
+                                     )
+        # K_inductive = 1/(L_x*L_y) * np.sum(K_inductive_k)
         K_ressistive = 1/(L_x*L_y) * np.sum(K_ressistive_k)
         return [K_inductive, K_ressistive]
+    def get_integrand_k_inductive(self, omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total"):
+        r"""Returns the integrand of the response function element (alpha, beta)
+        at (k_x, k_y) as function of omega_values.
+        """
+        if np.size(omega_values)==1:
+            return self.get_integrand_omega_k_inductive(omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total")
+        else:
+            integrand_inductive_k = np.zeros(len(omega_values), dtype=complex)
+            for i, omega in enumerate(omega_values):
+                integrand_inductive_k[i] = self.get_integrand_omega_k_inductive(omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total")
+        return integrand_inductive_k
+    def plot_integrand_k_inductive(self, omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total"):
+        integrand_inductive_k = self.get_integrand_k_inductive(omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
+        fig, ax = plt.subplots()
+        ax.plot(omega_values, integrand_inductive_k)
+        # ax.plot(omega_values, abs(integrand_inductive_k))
+        ax.set_xlabel(r"$\omega$")
+        ax.set_ylabel(r"$K(k_x=$" + f"{np.round(k_x,2)}," + r"$k_y=$" + f"{np.round(k_y,2)})")
+        # plt.yscale("log")
+        plt.tight_layout()
