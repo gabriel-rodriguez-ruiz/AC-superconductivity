@@ -161,12 +161,11 @@ class Superconductor():
             return np.linalg.eigvalsh(H)
         else:
             energies = np.zeros((len(k_x_values), len(k_y_values),
-                                 4))
+                                 4), dtype=complex)
             for i, k_x in enumerate(k_x_values):
                 for j, k_y in enumerate(k_y_values):
                     for k in range(4):
-                        H = self.get_Hamiltonian(k_x, k_y)
-                        energies[i, j, k] = np.linalg.eigvalsh(H)[k]
+                        energies[i, j, k] = self.get_Energy(k_x, k_y)[k]
             return energies
     def plot_spectrum(self, k_x_values, k_y_values):
         E = self.get_Energy(k_x_values, k_y_values)
@@ -383,7 +382,7 @@ class Superconductor():
                 integrand_ressistive[i, j] = (
                     1/(2*np.pi) * fermi_function
                        * np.trace(
-                                  1j/2 * rho
+                                  -1j/2 * rho
                                   @ (
                                      v_0[alpha]
                                      @ (G_plus_Omega
@@ -511,8 +510,8 @@ class Superconductor():
                 E_k = self.get_Energy(k_x, k_y)
                 poles = list(E_k[np.where(E_k<=0)])
                 params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
-                K_inductive_k[i, j] = scipy.integrate.quad_vec(inductive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
-                K_ressistive_k[i, j] = scipy.integrate.quad_vec(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
+                K_inductive_k[i, j] = scipy.integrate.quad(inductive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
+                K_ressistive_k[i, j] = scipy.integrate.quad(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
         K_inductive = 1/(L_x*L_y) * (np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]>0)
                                      + np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]<0)
                                      )

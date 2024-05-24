@@ -13,8 +13,8 @@ import multiprocessing
 
 
 if __name__ == "__main__":
-    L_x = 3
-    L_y = 3
+    L_x = 10
+    L_y = 10
     w_0 = 10
     Delta = 0
     mu = -40
