@@ -10,8 +10,8 @@ from superconductor import Superconductor
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-L_x = 50
-L_y = 50
+L_x = 10
+L_y = 10
 w_0 = 10
 Delta = 0.2
 mu = -40
@@ -20,7 +20,7 @@ B = 1*Delta
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
-Omega = 0
+Omega = 0#0.02
 superconductor_params = {"w_0":w_0, "Delta":Delta,
           "mu":mu,
           "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
@@ -164,15 +164,12 @@ ax.set_ylabel(r"$n(B_y)$")
 ax.legend()
 plt.tight_layout()
 #%%
-from pathlib import Path
-
-data_folder = Path("Data/")
 
 # file_to_open = data_folder / "K_alpha_alpha_quad_mu_-40_L=10-100.npz"
 # np.savez(file_to_open , K_xx=K_xx,
 #          K_yy=K_yy, **params,
 #          B_values=B_values)
-
+data_folder = Path("Data/")
 file_to_open = data_folder / "normal_density_mu_-40_L=50_total_B=0-3Delta.npz"
 # np.savez(file_to_open , K_xx=K_xx, K_yy=K_yy, **params, B_values=B_values,
 #          part=part, **superconductor_params)
