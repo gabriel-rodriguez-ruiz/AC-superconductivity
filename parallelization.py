@@ -30,7 +30,7 @@ if __name__ == "__main__":
               "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
               }
     
-    Gamma = 0.1
+    Gamma = 0.01
     alpha = 0
     beta = 0
     Beta = 1000
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     params = {
         "Gamma":Gamma, "alpha":alpha,
         "beta":beta, "Omega":Omega, "part":part,
-        "theta":theta
+        "theta":theta, "L_x":L_x, "L_y":L_y,
         }
     
     def fermi_function(omega):

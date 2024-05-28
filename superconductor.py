@@ -312,10 +312,134 @@ class Superconductor():
                           )
             )
         return integrand_ressistive
+    def get_integrand_omega_inductive(self, omega, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total"):
+     r"""Returns the integrand of the response function element (alpha, beta)
+     Fermi function should be a function f(omega).
+     If part=0, it calculates the paramegnetic part.
+     If part=1, it calculates the diamagnetic and paramagnetic
+     
+     .. math::
+         \frac{1}{2}\sum_{\mathbf{k}} \int \frac{d\omega}{2\pi} f(\omega) Tr\left( \hat{\rho}^{0}_{\mathbf{k}}(\omega) \hat{v}^{(1)}_{k_\alpha}(t)  \right)
+         
+     """
+     d, p = self.__select_part(part)
+     k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
+     k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
+     integrand_inductive_k = np.zeros((len(k_x_values), len(k_y_values)),
+                                     dtype=complex)
+     for i, k_x in enumerate(k_x_values):
+         for j, k_y in enumerate(k_y_values):
+             v_0 = self.get_velocity_0(k_x, k_y)
+             rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+             G = self.get_Green_function(omega, k_x, k_y, Gamma)
+             G_dagger = G.conj().T
+             G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+             G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+             G_plus_Omega_dagger = G_plus_Omega.conj().T
+             G_minus_Omega_dagger = G_minus_Omega.conj().T
+             fermi_function = Fermi_function(omega)
+             if alpha==beta:
+                 integrand_inductive_k[i, j] = (
+                     1/(2*np.pi) * fermi_function
+                            * np.trace(
+                                   # d * rho @ v_1[alpha]
+                                       -d * rho 
+                                       @ (
+                                           v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                           @ G
+                                           @ v_0[beta] @ np.kron(tau_z, sigma_0)
+                                           + v_0[beta] @ np.kron(tau_z, sigma_0)
+                                           @ G_dagger
+                                           @ v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                          )
+                                       + p * 1/2 * rho
+                                       @ (
+                                           v_0[alpha]
+                                           @ (G_plus_Omega
+                                              + G_minus_Omega)
+                                         @ v_0[beta] 
+                                         + v_0[beta]
+                                         @ (G_plus_Omega_dagger
+                                            + G_minus_Omega_dagger)
+                                         @ v_0[alpha]
+                                          )
+                                       )
+                            )
+             else:
+                 integrand_inductive_k[i, j] = (
+                     1/(2*np.pi) * fermi_function
+                            * np.trace(
+                                       # d * rho @ v_1[alpha]
+                                       -d * rho 
+                                       @ (
+                                           v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                           @ G
+                                           @ v_0[beta] @ np.kron(tau_z, sigma_0)
+                                           + v_0[beta] @ np.kron(tau_z, sigma_0)
+                                           @ G_dagger
+                                           @ v_0[alpha] @ np.kron(tau_z, sigma_0)
+                                           )
+                                       + p * 1/2 * rho
+                                       @ (
+                                           v_0[alpha]
+                                           @ (G_plus_Omega
+                                              + G_minus_Omega)
+                                           @ v_0[beta] 
+                                           + v_0[beta]
+                                           @ (G_plus_Omega_dagger
+                                              + G_minus_Omega_dagger)
+                                           @ v_0[alpha]
+                                           )
+                                       )
+                            )
+         integrand_inductive = 1/(L_x*L_y) * np.sum(integrand_inductive_k) 
+         return integrand_inductive
+     def get_integrand_omega_ressistive(self, omega, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total"):
+         r"""Returns the integrand of the response function element (alpha, beta)
+         Fermi function should be a function f(omega).
+         If part=0, it calculates the paramegnetic part.
+         If part=1, it calculates the diamagnetic and paramagnetic
+         
+         .. math::
+             \frac{1}{2}\sum_{\mathbf{k}} \int \frac{d\omega}{2\pi} f(\omega) Tr\left( \hat{\rho}^{0}_{\mathbf{k}}(\omega) \hat{v}^{(1)}_{k_\alpha}(t)  \right)
+             
+         """
+         d, p = self.__select_part(part)
+         k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
+         k_y_values = 2*np.pi/L_y*np.arange(0, L_y)        
+         integrand_ressistive_k = np.zeros((len(k_x_values), len(k_y_values)),
+                                         dtype=complex)
+         for i, k_x in enumerate(k_x_values):
+             for j, k_y in enumerate(k_y_values):
+                 v_0 = self.get_velocity_0(k_x, k_y)
+                 rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
+                 G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma)
+                 G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma)
+                 G_plus_Omega_dagger = G_plus_Omega.conj().T
+                 G_minus_Omega_dagger = G_minus_Omega.conj().T
+                 fermi_function = Fermi_function(omega)
+                 integrand_ressistive_k[i, j] = (
+                     1/(2*np.pi) * fermi_function
+                        * np.trace(
+                                   1j/2 * rho
+                                   @ (
+                                      v_0[alpha]
+                                      @ (G_plus_Omega
+                                         - G_minus_Omega)
+                                      @ v_0[beta]              
+                                      - v_0[beta]
+                                      @ (G_plus_Omega_dagger
+                                         - G_minus_Omega_dagger)
+                                      @ v_0[alpha]
+                                      )
+                                   )
+                     )
+         integrand_ressistive = np.sum(integrand_ressistive_k)
+         return integrand_ressistive
     def get_response_function_quad(self, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total", epsrel=1e-08):
         inductive_integrand = self.get_integrand_omega_k_inductive
         ressistive_integrand = self.get_integrand_omega_k_ressistive
-        a = -45
+        a = -np.inf#-45
         b = 0
         k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
         k_y_values = 2*np.pi/L_x*np.arange(0, L_y)

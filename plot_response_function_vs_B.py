@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 data_folder = Path("Data/")
-file_to_open = data_folder / "Response_kernel_vs_B_mu=-40_L=20.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_mu=-40_L=100.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]
@@ -23,6 +23,7 @@ w_0 = Data["w_0"]
 mu = Data["mu"]
 part = Data["part"]
 Omega = Data["Omega"]
+Gamma = Data["Gamma"]
 
 fig, ax = plt.subplots()
 ax.plot(B_values/Delta, K[:, 0], "-o",  label=r"$K^{(L)}_{xx}$")
