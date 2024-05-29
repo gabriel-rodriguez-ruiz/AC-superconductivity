@@ -439,7 +439,7 @@ class Superconductor():
     def get_response_function_quad(self, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, part="total", epsrel=1e-08):
         inductive_integrand = self.get_integrand_omega_k_inductive
         ressistive_integrand = self.get_integrand_omega_k_ressistive
-        a = -np.inf#-45
+        a = -45
         b = 0
         k_x_values = 2*np.pi/L_x*np.arange(0, L_x)
         k_y_values = 2*np.pi/L_x*np.arange(0, L_y)
