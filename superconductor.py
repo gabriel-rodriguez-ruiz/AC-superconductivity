@@ -456,10 +456,10 @@ class Superconductor():
                 K_inductive_k[i, j] = scipy.integrate.quad(inductive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
                 K_ressistive_k[i, j] = scipy.integrate.quad(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
         
-        # K_inductive = 1/(L_x*L_y) * (np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]>0)
-        #                              + np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]<0)
-        #                              )
-        K_inductive = 1/(L_x*L_y) * np.sum(K_inductive_k)
+        K_inductive = 1/(L_x*L_y) * (np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]>0)
+                                      + np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]<0)
+                                      )
+        # K_inductive = 1/(L_x*L_y) * np.sum(K_inductive_k)
         K_ressistive = 1/(L_x*L_y) * np.sum(K_ressistive_k)
         return [K_inductive, K_ressistive]
     def get_integrand_k_inductive(self, omega_values, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part="total"):

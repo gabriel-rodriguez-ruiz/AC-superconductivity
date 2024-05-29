@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 data_folder = Path("Data/")
-file_to_open = data_folder / "Response_kernel_vs_B_mu=-40_L=100.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_mu=-40_L=100_Gamma=0.1.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]
@@ -35,7 +35,8 @@ ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
              +r"; $\theta=$" + f"{theta:.3}"
              + r"; $\mu=$"+f"{mu}"
              +r"; $w_0=$"+f"{w_0}"
-             +r"; $\Omega=$"+f"{Omega}")
+             +r"; $\Omega=$"+f"{Omega}"
+             +r"; $\Gamma=$"+f"{Gamma}")
 ax.annotate(f"{part}", (0.5, 0.75), xycoords="figure fraction")
 ax.set_xlabel(r"$\frac{B_y}{\Delta}$")
 ax.set_ylabel(r"$K(B_y)$")

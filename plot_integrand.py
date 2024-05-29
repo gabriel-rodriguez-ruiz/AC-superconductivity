@@ -26,7 +26,7 @@ superconductor_params = {"w_0":w_0, "Delta":Delta,
           "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
           }
 
-Gamma = 0.1
+Gamma = 0.01
 alpha = 0
 beta = 0
 Beta = 1000

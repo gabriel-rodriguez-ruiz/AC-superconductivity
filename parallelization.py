@@ -74,7 +74,7 @@ if __name__ == "__main__":
     K = np.array(results_pooled)
     
     data_folder = Path("Data/")
-    name = f"Response_kernel_vs_B_mu={mu}_L={L_x}.npz"
+    name = f"Response_kernel_vs_B_mu={mu}_L={L_x}_Gamma={Gamma}.npz"
     file_to_open = data_folder / name
     np.savez(file_to_open , K=K, B_values=B_values,
              **params, **superconductor_params)
