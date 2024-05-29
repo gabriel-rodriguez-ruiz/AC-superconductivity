@@ -449,9 +449,9 @@ class Superconductor():
                                 dtype=complex)
         for i, k_x in enumerate(k_x_values):
             for j, k_y in enumerate(k_y_values):
-                # E_k = self.get_Energy(k_x, k_y)
-                # poles = list(E_k[np.where(E_k<=0)])
-                poles = None
+                E_k = self.get_Energy(k_x, k_y)
+                poles = list(E_k[np.where(E_k<=0)])
+                # poles = None
                 params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, part)
                 K_inductive_k[i, j] = scipy.integrate.quad(inductive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
                 K_ressistive_k[i, j] = scipy.integrate.quad(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
