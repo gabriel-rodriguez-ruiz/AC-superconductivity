@@ -24,22 +24,25 @@ mu = Data["mu"]
 part = Data["part"]
 Omega = Data["Omega"]
 Gamma = Data["Gamma"]
+# L_x = Data["L_x"]
+# L_y = Data["L_y"]
 
 fig, ax = plt.subplots()
-ax.plot(B_values/Delta, K[:, 0], "-o",  label=r"$K^{(L)}_{xx}$")
-ax.plot(B_values/Delta, K[:, 1], "-o",  label=r"$K^{(L)}_{yy}$")
-ax.set_xlabel(r"$L$")
-ax.set_ylabel(r"$K_{xx}(\Omega=0)$")
+ax.plot(B_values/Delta, K[:, 0, 0], "-o",  label=r"$K^{(L)}_{xx}$")
+ax.plot(B_values/Delta, K[:, 1, 0], "-o",  label=r"$K^{(L)}_{yy}$")
+ax.plot(B_values/Delta, K[:, 0, 1], "-o",  label=r"$K^{(R)}_{xx}$")
+ax.plot(B_values/Delta, K[:, 1, 1], "-o",  label=r"$K^{(R)}_{yy}$")
+
+
 ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
              +r"; $\Delta=$" + f"{Delta}"
              +r"; $\theta=$" + f"{theta:.3}"
              + r"; $\mu=$"+f"{mu}"
              +r"; $w_0=$"+f"{w_0}"
-             +r"; $\Omega=$"+f"{Omega}"
              +r"; $\Gamma=$"+f"{Gamma}")
-ax.annotate(f"{part}", (0.5, 0.75), xycoords="figure fraction")
+# ax.annotate(f"L={L_x}", (0.5, 0.75), xycoords="figure fraction")
 ax.set_xlabel(r"$\frac{B_y}{\Delta}$")
-ax.set_ylabel(r"$K(B_y)$")
+ax.set_ylabel(r"$K(B_y,\Omega=$"+f"{Omega})")
 ax.legend()
 plt.tight_layout()
 plt.legend()
