@@ -87,7 +87,7 @@ class Superconductor():
             
             \lambda_{k_x} = 2\lambda sin(k_x)
 
-            \lambda_{k_y}(t) =  - 2\lambda sin(k_y)
+            \lambda_{k_y} =  - 2\lambda sin(k_y)
         """
         chi_k = -2*self.w_0*(np.cos(k_x) + np.cos(k_y)) - self.mu
         Lambda_k_x = 2*self.Lambda*np.sin(k_x)
@@ -167,19 +167,17 @@ class Superconductor():
                     for k in range(4):
                         energies[i, j, k] = self.get_Energy(k_x, k_y)[k]
             return energies
-    def plot_spectrum(self, k_x_values, k_y_values):
-        if k_x_values[0]==0:
-            k_x_values -= np.pi
-            k_y_values -= np.pi 
+    def plot_spectrum(self, k_x_values, k_y_values, index_k_y):
         E = self.get_Energy(k_x_values, k_y_values)
-        L_y = len(k_y_values)//2
-        fig, (ax1, ax2) = plt.subplots(1, 2)
-        ax1.plot(k_x_values, E[:,L_y,0])
-        ax1.plot(k_x_values, E[:,L_y,1])
-        ax1.plot(k_x_values, E[:,L_y,2])
-        ax1.plot(k_x_values, E[:,L_y,3])
+        fig, ax = plt.subplots(1, 2)
+        ax1 = ax[0]
+        ax2 = ax[1]
+        ax1.plot(k_x_values, E[:,index_k_y,0])
+        ax1.plot(k_x_values, E[:,index_k_y,1])
+        ax1.plot(k_x_values, E[:,index_k_y,2])
+        ax1.plot(k_x_values, E[:,index_k_y,3])
         ax1.set_xlabel(r"$k_x$")
-        ax1.set_ylabel(r"$E(k_x,k_y=$"+f"{np.round(k_y_values[L_y],2)})")
+        ax1.set_ylabel(r"$E(k_x,k_y=$"+f"{np.round(k_y_values[index_k_y],2)})")
         X, Y = np.meshgrid(k_x_values, k_y_values)
         C1 = ax2.contour(Y, X, E[:,:,1]>0, 0, colors="C1") #notice the inversion of X and Y
         C2 = ax2.contour(Y, X, E[:,:,2]<0, 0, colors="C2")
@@ -190,6 +188,7 @@ class Superconductor():
         ax2.set_xlabel(r"$k_x$")
         ax2.set_ylabel(r"$k_y$")
         plt.tight_layout()
+        return fig, ax
     def plot_spectral_density(self, omega_values, k_x, k_y, Gamma):
         rho = self.get_spectral_density(omega_values, k_x, k_y, Gamma)
         fig, axs = plt.subplots(4, 4)

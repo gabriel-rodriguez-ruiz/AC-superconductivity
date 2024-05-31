@@ -24,7 +24,7 @@ if __name__ == "__main__":
     B_x = B * np.cos(theta)
     B_y = B * np.sin(theta)
     Lambda = 0.56 #5*Delta/k_F
-    Omega = 0 #0.02
+    Omega = 0.001 #0.02
     superconductor_params = {"w_0":w_0, "Delta":Delta,
               "mu":mu,
               "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     k_y_values = 2*np.pi*np.arange(0, L_x)/L_y
     # k_x_values = np.pi*np.arange(-L_x, L_x)/L_x
     # k_y_values = np.pi*np.arange(-L_y, L_x)/L_y
-    n_cores = 10
+    n_cores = 20
     # epsrel=1e-01
     
     # omega_values = np.linspace(-45, 0, 100)
@@ -68,13 +68,13 @@ if __name__ == "__main__":
         return [S.get_response_function_quad(0, 0, L_x, L_y, Gamma, fermi_function, Omega, part),
                 S.get_response_function_quad(1, 1, L_x, L_y, Gamma, fermi_function, Omega, part)]
     
-    B_values = np.linspace(0, 3*Delta, 10)
+    B_values = np.linspace(0, 3*Delta, 20)
     with multiprocessing.Pool(n_cores) as pool:
         results_pooled = pool.map(integrate, B_values)
     K = np.array(results_pooled)
     
     data_folder = Path("Data/")
-    name = f"Response_kernel_vs_B_mu={mu}_L={L_x}_Gamma={Gamma}.npz"
+    name = f"Response_kernel_vs_B_mu={mu}_L={L_x}_Gamma={Gamma}_Omega={Omega}.npz"
     file_to_open = data_folder / name
     np.savez(file_to_open , K=K, B_values=B_values,
              **params, **superconductor_params)

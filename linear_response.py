@@ -10,13 +10,13 @@ from superconductor import Superconductor
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-L_x = 10
-L_y = 10
+L_x = 200
+L_y = 200
 w_0 = 10
 Delta = 0.2
 mu = -40
 theta = np.pi/2
-B = 1*Delta
+B = 2*Delta
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
@@ -30,14 +30,14 @@ Gamma = 0.1
 alpha = 0
 beta = 0
 Beta = 1000
-k_x_values = 2*np.pi*np.arange(0, L_x)/L_x
-k_y_values = 2*np.pi*np.arange(0, L_x)/L_y
-# k_x_values = np.pi*np.arange(-L_x, L_x)/L_x
-# k_y_values = np.pi*np.arange(-L_y, L_x)/L_y
+# k_x_values = 2*np.pi*np.arange(0, L_x)/L_x
+# k_y_values = 2*np.pi*np.arange(0, L_y)/L_y
+k_x_values = np.pi*np.arange(-L_x, L_x)/L_x
+k_y_values = np.pi*np.arange(-L_y, L_y)/L_y
 
 # epsrel=1e-01
 
-# omega_values = np.linspace(-45, 0, 100)
+omega_values = np.linspace(-45, 0, 100)
 
 # part = "paramagnetic"
 # part = "diamagnetic"
@@ -54,7 +54,7 @@ def fermi_function(omega):
 
 S = Superconductor(**superconductor_params)
 
-# E_k = S.plot_spectrum(k_x_values, k_y_values)
+E_k = S.plot_spectrum(k_x_values, k_y_values, index_k_y=L_y)
 # S.plot_spectral_density(omega_values,
 #                         k_x=-np.pi/2, k_y=-np.pi/2, Gamma=Gamma)
                           
