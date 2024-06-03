@@ -167,6 +167,15 @@ class Superconductor():
                     for k in range(4):
                         energies[i, j, k] = self.get_Energy(k_x, k_y)[k]
             return energies
+    def get_density_of_states(self, omega, L_x, L_y, Gamma):
+        k_x_values = 2*np.pi*np.arange(0, L_x)/L_x
+        k_y_values = 2*np.pi*np.arange(0, L_y)/L_y
+        density_of_states_k = np.zeros((len(k_x_values), len(k_y_values)), dtype=complex)
+        for i, k_x in enumerate(k_x_values):
+            for j, k_y in enumerate(k_y_values):
+                density_of_states_k[i, j] = np.trace(self.get_spectral_density(omega, k_x, k_y, Gamma))
+        density_of_states = 1/(L_x*L_y) * np.sum(density_of_states_k)
+        return density_of_states
     def plot_spectrum(self, k_x_values, k_y_values, index_k_y):
         E = self.get_Energy(k_x_values, k_y_values)
         fig, ax = plt.subplots(1, 2)
