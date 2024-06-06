@@ -456,6 +456,7 @@ class Superconductor():
         K_ressistive_k = np.zeros((len(k_x_values), len(k_y_values)),
                                 dtype=complex)
         for i, k_x in enumerate(k_x_values):
+            print(i)
             for j, k_y in enumerate(k_y_values):
                 E_k = self.get_Energy(k_x, k_y)
                 poles = list(E_k[np.where(E_k<=0)])
