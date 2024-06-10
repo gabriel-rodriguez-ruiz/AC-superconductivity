@@ -18,13 +18,13 @@ if __name__ == "__main__":
     L_y = 100    
     w_0 = 10
     Delta = 0.2
-    mu = -39
+    mu = -40
     theta = np.pi/2
     B = 1*Delta
     B_x = B * np.cos(theta)
     B_y = B * np.sin(theta)
     Lambda = 0.56 #5*Delta/k_F
-    Omega = 0.01 #0.02
+    Omega = 0.1 #0.02
     superconductor_params = {"w_0":w_0, "Delta":Delta,
               "mu":mu,
               "B_x":B_x, "B_y":B_y, "Lambda":Lambda,

@@ -9,6 +9,7 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 from pathlib import Path
+from superconductor_periodic_in_x import SuperconductorPeriodicInX
 
 L_x = 200
 L_y = 200
@@ -53,7 +54,7 @@ def fermi_function(omega):
     return np.heaviside(-omega, 1)
 
 S = Superconductor(**superconductor_params)
-
+# S = SuperconductorPeriodicInX(L_y=L_y, **superconductor_params)
 # E_k = S.plot_spectrum(k_x_values, k_y_values, index_k_y=L_y)
 # S.plot_spectral_density(omega_values,
 #                         k_x=-np.pi/2, k_y=-np.pi/2, Gamma=Gamma)

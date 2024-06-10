@@ -14,7 +14,7 @@ plt.rcParams.update({
     "text.usetex": True})
 
 data_folder = Path("Data/")
-file_to_open = data_folder / "Response_kernel_vs_B_mu=-39_L=100_Gamma=0.1_Omega=0.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_mu=-39_L=100_Gamma=0.1_Omega=0.01.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]
@@ -50,7 +50,7 @@ ax.legend()
 plt.tight_layout()
 
 #%%
-file_to_open = data_folder / "Response_kernel_vs_B_mu=-40_L=100_Gamma=0.1.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_mu=-39_L=100_Gamma=0.1_Omega=0.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]

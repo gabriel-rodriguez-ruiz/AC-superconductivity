@@ -30,17 +30,9 @@ class Superconductor():
         Magnetic field in x direction.
     B_y : float
         Magnetic field in y direction.
-    Omega : float
-        Driving frequency.
-    A_x : float
-        Amplitude of the driving in x direction.
-    A_y : float
-        Amplitude of the driving in y direction.
-    t : float
-        Time.
     """
-    def __init__(self, w_0=0, mu=0, Delta=0,
-                 B_x=0, B_y=0, Lambda=0):
+    def __init__(self, w_0, mu, Delta,
+                 B_x, B_y, Lambda):
         self.w_0 = w_0
         self.mu = mu
         self.Delta = Delta
@@ -68,7 +60,7 @@ class Superconductor():
                    )
         return [v_1_k_x, v_1_k_y]
     def get_Hamiltonian(self, k_x, k_y):
-        r""" Periodic Hamiltonian in x and y with flux.
+        r""" Periodic Hamiltonian in x and y with magnetioc field.
         
         .. math::
 
