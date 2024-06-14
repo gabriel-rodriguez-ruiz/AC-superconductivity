@@ -18,7 +18,7 @@ if __name__ == "__main__":
     L_y = 100    
     w_0 = 10
     Delta = 0.2
-    mu = -39
+    mu = -40
     theta = np.pi/2
     B = 1*Delta
     B_x = B * np.cos(theta)
