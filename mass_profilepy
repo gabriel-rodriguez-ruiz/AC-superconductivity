@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jun 26 17:35:11 2024
+
+@author: gabriel
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def get_phi(y):
+    return 4 * np.arctan(np.exp(y))
+
+def get_m_prime(y):
+    phi = get_phi(y)
+    return np.sin(phi)
+
+def get
+
+y = np.linspace(-10, 10, 1000)
+fig, (ax1, ax2) = plt.subplots(2, 1)
+ax1.plot(y, [phi for phi in get_phi(y)],
+        label=r"$\phi(y)$")
+ax2.plot(y, [m for m in get_m_prime(y)], label=r"$m'(y)$")
+
+ax1.set_xlabel(r"$y$")
+ax2.set_xlabel(r"$y$")
+ax1.set_ylabel(r"$\phi(y)$")
+ax2.set_ylabel(r"$m'(y)$")
+plt.tight_layout()
