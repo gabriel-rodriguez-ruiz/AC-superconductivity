@@ -9,7 +9,6 @@ import numpy as np
 from superconductor import Superconductor
 import matplotlib.pyplot as plt
 from pathlib import Path
-from superconductor_periodic_in_x import SuperconductorPeriodicInX
 
 L_x = 200
 L_y = 200
@@ -17,7 +16,7 @@ w_0 = 10
 Delta = 0.2
 mu = -40
 theta = np.pi/2
-B = 2*Delta
+B = 0#2*Delta
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
 Lambda = 0.56 #5*Delta/k_F
@@ -38,7 +37,7 @@ k_y_values = np.pi*np.arange(-L_y, L_y)/L_y
 
 # epsrel=1e-01
 
-omega_values = np.linspace(-45, 0, 100)
+omega_values = np.linspace(-5*Delta, 5*Delta, 100)
 
 # part = "paramagnetic"
 # part = "diamagnetic"
@@ -58,8 +57,17 @@ S = Superconductor(**superconductor_params)
 # E_k = S.plot_spectrum(k_x_values, k_y_values, index_k_y=L_y)
 # S.plot_spectral_density(omega_values,
 #                         k_x=-np.pi/2, k_y=-np.pi/2, Gamma=Gamma)
-                          
 
+#%% Density of states
+L_x = 100
+L_y = 100
+Gamma = 0.1
+rho = [S.get_density_of_states(omega, L_x, L_y, Gamma) for omega in omega_values]
+fig, ax = plt.subplots()
+ax.plot(omega_values/Delta, rho)
+ax.set_xlabel(r"$\omega/\Delta$")
+ax.set_ylabel(r"$\rho$($\omega$, $L_x=100$, $L_y=100$)")
+ax.set_title(f"B={np.round(B, 2)}, Gamma={np.round(Gamma, 3)}, Omega={np.round(Omega, 2)}")
 #%% DC-conductivity
 
 # K = S.get_response_function(alpha, beta, L_x, L_y, omega_values, Gamma, fermi_function, Omega, part)

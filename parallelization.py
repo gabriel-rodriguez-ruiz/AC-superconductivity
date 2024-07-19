@@ -23,14 +23,14 @@ if __name__ == "__main__":
     B = 1*Delta
     B_x = B * np.cos(theta)
     B_y = B * np.sin(theta)
-    Lambda = 0#0.56 #5*Delta/k_F
-    Omega = 0.05 #0.02
+    Lambda = 0.56 #5*Delta/k_F
+    Omega = 0 #0.02
     superconductor_params = {"w_0":w_0, "Delta":Delta,
               "mu":mu,
               "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
               }
     
-    Gamma = 0.1
+    Gamma = 0.05
     alpha = 0
     beta = 0
     Beta = 1000
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     K = np.array(results_pooled)
     
     data_folder = Path("Data/")
-    name = f"Response_kernel_vs_B_mu={mu}_L={L_x}_Gamma={Gamma}_Omega={Omega}_Lambda={Lambda}.npz"
+    name = f"Response_kernel_vs_B_mu={mu}_L={L_x}_Gamma={Gamma}_Omega={Omega}_Lambda={Lambda}_B_in_(0-{np.round(np.max(B_values),2)}).npz"
     file_to_open = data_folder / name
     np.savez(file_to_open , K=K, B_values=B_values,
              **params, **superconductor_params)
