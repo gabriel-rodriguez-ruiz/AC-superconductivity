@@ -14,8 +14,8 @@ from pathlib import Path
 
 
 if __name__ == "__main__":
-    L_x = 100   
-    L_y = 100    
+    L_x = 100  
+    L_y = 100
     w_0 = 10
     Delta = 0.2
     mu = -39
@@ -30,7 +30,8 @@ if __name__ == "__main__":
               "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
               }
     
-    Gamma = 0.05
+    Gamma = 0.1
+    U = 1
     alpha = 0
     beta = 0
     Beta = 1000
@@ -52,6 +53,7 @@ if __name__ == "__main__":
         "Gamma":Gamma, "alpha":alpha,
         "beta":beta, "Omega":Omega, "part":part,
         "theta":theta, "L_x":L_x, "L_y":L_y,
+        "U": U
         }
     
     def fermi_function(omega):
@@ -65,8 +67,8 @@ if __name__ == "__main__":
     def integrate(B):
         S.B_x = B * np.cos(theta)
         S.B_y = B * np.sin(theta)
-        return [S.get_response_function_quad(0, 0, L_x, L_y, Gamma, fermi_function, Omega, part),
-                S.get_response_function_quad(1, 1, L_x, L_y, Gamma, fermi_function, Omega, part)]
+        return [S.get_response_function_quad(0, 0, L_x, L_y, Gamma, fermi_function, Omega, U, part),
+                S.get_response_function_quad(1, 1, L_x, L_y, Gamma, fermi_function, Omega, U, part)]
     
     B_values = np.linspace(0, 3*Delta, 10)
     with multiprocessing.Pool(n_cores) as pool:
@@ -74,7 +76,7 @@ if __name__ == "__main__":
     K = np.array(results_pooled)
     
     data_folder = Path("Data/")
-    name = f"Response_kernel_vs_B_mu={mu}_L={L_x}_Gamma={Gamma}_Omega={Omega}_Lambda={Lambda}_B_in_(0-{np.round(np.max(B_values),2)}).npz"
+    name = f"Response_kernel_vs_B_with_dissorder_mu={mu}_L={L_x}_Gamma={Gamma}_Omega={Omega}_Lambda={Lambda}_B_in_(0-{np.round(np.max(B_values),2)})_U={U}.npz"
     file_to_open = data_folder / name
     np.savez(file_to_open , K=K, B_values=B_values,
              **params, **superconductor_params)
