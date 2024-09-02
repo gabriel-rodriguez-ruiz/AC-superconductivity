@@ -14,7 +14,7 @@ plt.rcParams.update({
     "text.usetex": True})
 
 data_folder = Path("Data/")
-file_to_open = data_folder / "Response_kernel_vs_B_with_dissorder_mu=-39_L=1_Gamma=0.1_Omega=0_Lambda=0.56_B_in_(0-0.6)_U=0.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_with_dissorder_mu=-39_L=100_Gamma=0.1_Omega=0_Lambda=0.56_B_in_(0-0.6)_U=1.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]
