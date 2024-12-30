@@ -11,16 +11,16 @@ from superconductor import Superconductor
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-L_x = 200
-L_y = 200
+L_x = 50
+L_y = 50
 w_0 = 10
 Delta = 0.2
-mu = -40
-theta = np.pi/2
-B = 2*Delta
+mu = -39
+theta = -np.pi/4
+B = 0.4 
 B_x = B * np.cos(theta)
 B_y = B * np.sin(theta)
-Lambda = 0#0.56 #5*Delta/k_F
+Lambda = 0.56 #5*Delta/k_F
 superconductor_params = {"w_0":w_0, "Delta":Delta,
           "mu":mu,
           "B_x":B_x, "B_y":B_y, "Lambda":Lambda,

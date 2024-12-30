@@ -160,7 +160,12 @@ class Superconductor():
         #                       + self.B_y * np.kron(tau_x, sigma_y)))
         #     )
         return Sigma_Gamma + Sigma_0 #+ Sigma_B
-    def get_Green_function(self, omega, k_x, k_y, Gamma, U):
+    def get_self_energy_proximity_effect(self, omega, Gamma, Delta_0):
+        if omega>self.Delta:
+            return -1j * Gamma /(np.sqrt(omega**2 - Delta_0**2)) * (-omega * np.kron(tau_0, sigma_0) + Delta_0 * np.kron(tau_x, sigma_0))
+        else:
+            return Gamma/(np.sqrt(Delta_0**2 - omega**2)) * (-omega * np.kron(tau_0, sigma_0) + Delta_0 * np.kron(tau_x, sigma_0))
+    def get_Green_function(self, omega, k_x, k_y, Gamma, Delta_0):
         r"""
         .. math::
             G_{\mathbf{k}}(\omega) = [\omega\tau_0\sigma_0 - H_{\mathbf{k}} + i\Gamma\tau_0\sigma_0]^{-1}
@@ -182,12 +187,13 @@ class Superconductor():
 
         """
         H_k = self.get_Hamiltonian(k_x, k_y)
-        Sigma = self.get_self_energy_small_Delta(omega, Gamma, U)
+        # Sigma = self.get_self_energy_small_Delta(omega, Gamma, U)
+        Sigma = self.get_self_energy_proximity_effect(omega, Gamma, Delta_0)
         return np.linalg.inv(omega*np.kron(tau_0, sigma_0)
                              - H_k
                              + Sigma
                              )
-    def get_spectral_density(self, omega_values, k_x, k_y, Gamma, U):
+    def get_spectral_density(self, omega_values, k_x, k_y, Gamma, Delta_0):
         """ Returns the spectral density.
 
         Parameters
@@ -207,7 +213,7 @@ class Superconductor():
             Spectral density.
         """
         if np.size(omega_values)==1:
-            G_k = self.get_Green_function(omega_values, k_x, k_y, Gamma, U)
+            G_k = self.get_Green_function(omega_values, k_x, k_y, Gamma, Delta_0)
             # return G_k @ (2*Gamma*np.kron(tau_0, sigma_0)) @ G_k.conj().T
             return 1j * (G_k - G_k.conj().T)
         else:
@@ -282,18 +288,18 @@ class Superconductor():
             p = 1
             d = 1
         return [d, p]
-    def get_integrand_omega_k_inductive(self, omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, U, part="total"):
+    def get_integrand_omega_k_inductive(self, omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, Delta_0, part="total"):
         r"""Returns the integrand of the response function element (alpha, beta)
         at omega and (k_x, k_y)
         """
         d, p = self.__select_part(part)    
         v_0 = self.get_velocity_0(k_x, k_y)
         # v_1 = self.get_velocity_1(k_x, k_y)
-        rho = self.get_spectral_density(omega, k_x, k_y, Gamma, U)
-        G = self.get_Green_function(omega, k_x, k_y, Gamma, U)
+        rho = self.get_spectral_density(omega, k_x, k_y, Gamma, Delta_0)
+        G = self.get_Green_function(omega, k_x, k_y, Gamma, Delta_0)
         G_dagger = G.conj().T
-        G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, U)
-        G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, U)
+        G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, Delta_0)
+        G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, Delta_0)
         G_plus_Omega_dagger = G_plus_Omega.conj().T
         G_minus_Omega_dagger = G_minus_Omega.conj().T
         fermi_function = Fermi_function(omega)
@@ -352,14 +358,14 @@ class Superconductor():
                                )
                 )
         return integrand_inductive
-    def get_integrand_omega_k_ressistive(self, omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, U, part="total"):
+    def get_integrand_omega_k_ressistive(self, omega, k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, Delta_0, part="total"):
         r"""Returns the integrand of the response function resistive element (alpha, beta)
             for a given omega and (k_x, k_y)
         """
         v_0 = self.get_velocity_0(k_x, k_y)
-        rho = self.get_spectral_density(omega, k_x, k_y, Gamma, U)
-        G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, U)
-        G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, U)
+        rho = self.get_spectral_density(omega, k_x, k_y, Gamma, Delta_0)
+        G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, Delta_0)
+        G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, Delta_0)
         G_plus_Omega_dagger = G_plus_Omega.conj().T
         G_minus_Omega_dagger = G_minus_Omega.conj().T
         fermi_function = Fermi_function(omega)
@@ -380,7 +386,7 @@ class Superconductor():
                           )
             )
         return integrand_ressistive
-    def get_integrand_omega_inductive(self, omega, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, U, part="total"):
+    def get_integrand_omega_inductive(self, omega, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, Delta_0, part="total"):
      r"""Returns the integrand of the response function element (alpha, beta)
      Fermi function should be a function f(omega).
      If part=0, it calculates the paramegnetic part.
@@ -398,11 +404,11 @@ class Superconductor():
      for i, k_x in enumerate(k_x_values):
          for j, k_y in enumerate(k_y_values):
              v_0 = self.get_velocity_0(k_x, k_y)
-             rho = self.get_spectral_density(omega, k_x, k_y, Gamma, U)
-             G = self.get_Green_function(omega, k_x, k_y, Gamma, U)
+             rho = self.get_spectral_density(omega, k_x, k_y, Gamma, Delta_0)
+             G = self.get_Green_function(omega, k_x, k_y, Gamma, Delta_0)
              G_dagger = G.conj().T
-             G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, U)
-             G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, U)
+             G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, Delta_0)
+             G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, Delta_0)
              G_plus_Omega_dagger = G_plus_Omega.conj().T
              G_minus_Omega_dagger = G_minus_Omega.conj().T
              fermi_function = Fermi_function(omega)
@@ -481,8 +487,8 @@ class Superconductor():
              for j, k_y in enumerate(k_y_values):
                  v_0 = self.get_velocity_0(k_x, k_y)
                  rho = self.get_spectral_density(omega, k_x, k_y, Gamma)
-                 G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, U)
-                 G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, U)
+                 G_plus_Omega = self.get_Green_function(omega+Omega, k_x, k_y, Gamma, Delta_0)
+                 G_minus_Omega = self.get_Green_function(omega-Omega, k_x, k_y, Gamma, Delta_0)
                  G_plus_Omega_dagger = G_plus_Omega.conj().T
                  G_minus_Omega_dagger = G_minus_Omega.conj().T
                  fermi_function = Fermi_function(omega)
@@ -504,7 +510,7 @@ class Superconductor():
                      )
          integrand_ressistive = np.sum(integrand_ressistive_k)
          return integrand_ressistive
-    def get_response_function_quad(self, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, U, part="total", epsrel=1e-08):
+    def get_response_function_quad(self, alpha, beta, L_x, L_y, Gamma, Fermi_function, Omega, Delta_0, part="total", epsrel=1e-08):
         inductive_integrand = self.get_integrand_omega_k_inductive
         ressistive_integrand = self.get_integrand_omega_k_ressistive
         a = -45
@@ -521,7 +527,7 @@ class Superconductor():
                 E_k = self.get_Energy(k_x, k_y)
                 poles = list(E_k[np.where(E_k<=0)])
                 # poles = None
-                params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, U, part)
+                params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, Delta_0, part)
                 K_inductive_k[i, j] = scipy.integrate.quad(inductive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
                 K_ressistive_k[i, j] = scipy.integrate.quad(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
         
