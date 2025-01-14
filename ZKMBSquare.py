@@ -13,19 +13,19 @@ import scipy
 from functions import get_components
 from pauli_matrices import tau_y, sigma_y
 
-L_x = 300
-L_y = 1000
+L_x = 200
+L_y = 700
 t = 10
 Delta_0 = 0.2
 Delta_1 = 0
 Lambda = 0.56
 theta = np.pi/2     #spherical coordinates
 phi = 0
-B = 6 * Delta_0#2*Delta_0
+B = 2*Delta_0
 B_x = B * np.sin(theta) * np.cos(phi)
 B_y = B * np.sin(theta) * np.sin(phi)
 B_z = B * np.cos(theta)
-mu = -39   #in the middle ot the topological phase
+mu = -40   #in the middle ot the topological phase
 k = 16
 
 H = ZKMBSparseSuperconductor(L_x, L_y, t, mu, Delta_0, Delta_1, Lambda,
