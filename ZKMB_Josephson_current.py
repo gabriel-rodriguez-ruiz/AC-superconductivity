@@ -20,8 +20,8 @@ t = 10
 Delta_0 = 0.2#t/5     
 Delta_1 = 0#t/20
 Lambda = 0.56
-phi_angle = 0
-theta = 0   #np.pi/2
+phi_angle = np.pi/8
+theta = np.pi/2   #np.pi/2
 B = 2*Delta_0   #2*Delta_0
 B_x = B * np.sin(theta) * np.cos(phi_angle)
 B_y = B * np.sin(theta) * np.sin(phi_angle)
@@ -29,7 +29,7 @@ B_z = B * np.cos(theta)
 mu = -4*t#-2*t
 t_J = t/2       #t/2#t/5
 phi_values = np.linspace(0, 2*np.pi, 240)    #240
-k_y_values = np.linspace(0, np.pi/100, 5)     #200
+k_y_values = np.linspace(0, np.pi, 200)     #200
 
 params = {"L_x":L_x, "t":t, "t_J":t_J,
           "Delta_0":Delta_0,
@@ -98,11 +98,11 @@ for i, k in enumerate(k_y_values):
     ax.plot(phi_values[:-1]/(2*np.pi), Josephson_current_k[i,:],
             label=r"$k_y=$" + f"{np.round(k_y_values[i], 2)}")
 
-ax.legend(fontsize= "xx-small")
+#ax.legend(fontsize= "xx-small")
 plt.show()
 
 #%% Save 
 
-# np.savez("Data/Josephson current", Josephson_current=Josephson_current, J_0=J_0,
-#          Josephson_current_k=Josephson_current_k,
-#         params=params, k_y_values=k_y_values, phi_values=phi_values)
+np.savez(f"Data/Josephson_current_theta_{np.round(theta,3)}_phi_angle_{np.round(phi_angle, 3)}_phi_values_{len(phi_values)}_k_y_values_{len(k_y_values)}", Josephson_current=Josephson_current, J_0=J_0,
+         Josephson_current_k=Josephson_current_k,
+        params=params, k_y_values=k_y_values, phi_values=phi_values)
