@@ -15,12 +15,12 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({
     "text.usetex": False})
 
-L_x = 200
+L_x = 300
 t = 10
 Delta_0 = 0.2#t/5     
 Delta_1 = 0#t/20
 Lambda = 0.56
-phi_angle = np.pi/8
+phi_angle = 0
 theta = np.pi/2   #np.pi/2
 B = 2*Delta_0   #2*Delta_0
 B_x = B * np.sin(theta) * np.cos(phi_angle)
@@ -28,14 +28,16 @@ B_y = B * np.sin(theta) * np.sin(phi_angle)
 B_z = B * np.cos(theta)
 mu = -4*t#-2*t
 t_J = t/2       #t/2#t/5
-phi_values = np.linspace(0, 2*np.pi, 240)    #240
-k_y_values = np.linspace(0, np.pi, 200)     #200
+phi_values = np.linspace(0.475*2*np.pi, 0.525*2*np.pi, 240)    #240
+k_y_values = np.linspace(0, np.pi/20, 5)     #200
 
 params = {"L_x":L_x, "t":t, "t_J":t_J,
           "Delta_0":Delta_0,
           "Delta_1":Delta_1,
           "mu":mu, "phi_values":phi_values,
           "k_y_values": k_y_values,
+          "B": B, "phi_angle": phi_angle,
+          "theta": theta
           }
 
 eigenvalues = []
@@ -76,6 +78,7 @@ phi_eq = phi_values[np.where(min(-total_energy)==-total_energy)]
 
 #%% Josephson current
 
+dphi = np.diff(phi_values)
 Josephson_current = np.diff(-total_energy)
 Josephson_current_k = np.diff(-total_energy_k)
 
@@ -95,14 +98,15 @@ ax.set_title("Josephson current for given k\n"+
              r"; $B=$" + f"{B}")
 
 for i, k in enumerate(k_y_values):
-    ax.plot(phi_values[:-1]/(2*np.pi), Josephson_current_k[i,:],
-            label=r"$k_y=$" + f"{np.round(k_y_values[i], 2)}")
+    ax.scatter(phi_values[:-1]/(2*np.pi), Josephson_current_k[i,:],
+               marker=".",
+               label=r"$k_y=$" + f"{np.round(k_y_values[i], 2)}")
 
-#ax.legend(fontsize= "xx-small")
+ax.legend(fontsize= "xx-small")
 plt.show()
 
 #%% Save 
 
-np.savez(f"Data/Josephson_current_theta_{np.round(theta,3)}_phi_angle_{np.round(phi_angle, 3)}_phi_values_{len(phi_values)}_k_y_values_{len(k_y_values)}", Josephson_current=Josephson_current, J_0=J_0,
-         Josephson_current_k=Josephson_current_k,
-        params=params, k_y_values=k_y_values, phi_values=phi_values)
+# np.savez(f"Data/Josephson_current_theta_{np.round(theta,3)}_phi_angle_{np.round(phi_angle, 3)}_phi_values_{len(phi_values)}_k_y_values_{len(k_y_values)}_near_phi_pi_over_2", Josephson_current=Josephson_current, J_0=J_0,
+#          Josephson_current_k=Josephson_current_k,
+#         params=params, k_y_values=k_y_values, phi_values=phi_values)

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 # L_y = 200
 # k_x_values = np.linspace(-np.pi/6, np.pi/6, 100)
 
-L_x = 200
+L_x = 300
 k_y_values = np.linspace(-np.pi/6, np.pi/6, 100)
 
 t = 10   #10
@@ -22,8 +22,8 @@ Delta_0 = 0.2
 Delta_1 = 0
 Lambda = 0.56
 theta = np.pi/2     #spherical coordinates
-phi = 0
-B = 0#0.4*Delta_0    #2*Delta_0   #2*Delta_0
+phi = np.pi
+B = 2*Delta_0    #0.4*Delta_0    #2*Delta_0   #2*Delta_0
 B_x = B * np.sin(theta) * np.cos(phi)
 B_y = B * np.sin(theta) * np.sin(phi)
 B_z = B * np.cos(theta)
@@ -34,6 +34,39 @@ superconductor_params = {"t":t, "Delta_0":Delta_0,
           "B_x":B_x, "B_y":B_y, "B_z":B_z,
           "Lambda":Lambda,
           }
+
+#%% Bands
+
+E_k_y = np.zeros((len(k_y_values), 4*L_x))
+
+for i, k_y in enumerate(k_y_values):
+    S = ZKMBSuperconductorKY(k_y, L_x, t, mu, Delta_0, Delta_1, Lambda,
+                               B_x, B_y, B_z)
+    E_k_y[i, :] = np.linalg.eigvalsh(S.matrix)
+
+fig, ax = plt.subplots()
+
+ax.plot(k_y_values, E_k_y/Delta_0, color="black")
+ax.plot(k_y_values[10:90], E_k_y[10:90,2*L_x-1:2*L_x+1]/Delta_0, color="red")
+
+ax.set_ylim((-2, 2))
+ax.set_xlim((-np.pi/6, np.pi/6))
+
+ax.set_xlabel(r"$k_y$")
+ax.set_ylabel(r"$\frac{E(k_y)}{\Delta_0}$")
+ax.set_title(r"$\mu=$"+f"{np.round(S.mu, 2)}")
+fig.suptitle(r"$L_x=$"+f"{L_x}"
+             +r"; $\lambda=$" + f"{S.Lambda:.2}"
+             +r"; $\Delta_0=$" + f"{S.Delta_0}"
+             +r"; $\Delta_1=$" + f"{S.Delta_1}"
+             +r"; $w_0=$"+f"{S.t}" + "\n"
+             +r"$B_x=$"+f"{np.round(B_x, 2)}"
+             +r"; $B_y=$"+f"{np.round(B_y, 2)}"
+             +r"; $B_z=$"+f"{np.round(B_z, 2)}")
+
+plt.tight_layout()
+
+plt.show()
 
 #%% Bands
 # E_k_x = np.zeros((len(k_x_values), 4*L_y))
