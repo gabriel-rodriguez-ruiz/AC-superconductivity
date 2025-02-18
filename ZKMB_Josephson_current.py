@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({
     "text.usetex": False})
 
-L_x = 300
+L_x = 2#300
 t = 10
 Delta_0 = 0.2#t/5     
 Delta_1 = 0#t/20
@@ -27,9 +27,9 @@ B_x = B * np.sin(theta) * np.cos(phi_angle)
 B_y = B * np.sin(theta) * np.sin(phi_angle)
 B_z = B * np.cos(theta)
 mu = -4*t#-2*t
-t_J = t/2       #t/2#t/5
-phi_values = np.linspace(0.475*2*np.pi, 0.525*2*np.pi, 240)    #240
-k_y_values = np.linspace(0, np.pi/20, 5)     #200
+t_J = t/10     #t/2#t/5
+phi_values = np.linspace(0, 2*np.pi, 240)    #240
+k_y_values = np.linspace(0, 2*np.pi, 200)  #200
 
 params = {"L_x":L_x, "t":t, "t_J":t_J,
           "Delta_0":Delta_0,
@@ -49,7 +49,7 @@ for k_y in k_y_values:
         S_ZKMB = ZKMBSuperconductorKY(k_y, L_x, t, mu, Delta_0, Delta_1,
                                       Lambda, B_x, B_y, B_z)
         S_ZKMB2 = ZKMBSuperconductorKY(k_y, L_x, t, mu, Delta_0, Delta_1,
-                                      Lambda, B_x=B_x, B_y=B_y, B_z=B_z)
+                                      Lambda, B_x=-B_x, B_y=-B_y, B_z=-B_z)
         J = Junction(S_ZKMB, S_ZKMB2, t_J, phi)
         energies = np.linalg.eigvalsh(J.matrix.toarray())
         energies = list(energies)
@@ -102,11 +102,11 @@ for i, k in enumerate(k_y_values):
                marker=".",
                label=r"$k_y=$" + f"{np.round(k_y_values[i], 2)}")
 
-ax.legend(fontsize= "xx-small")
+# ax.legend(fontsize= "xx-small")
 plt.show()
 
 #%% Save 
 
-# np.savez(f"Data/Josephson_current_theta_{np.round(theta,3)}_phi_angle_{np.round(phi_angle, 3)}_phi_values_{len(phi_values)}_k_y_values_{len(k_y_values)}_near_phi_pi_over_2", Josephson_current=Josephson_current, J_0=J_0,
-#          Josephson_current_k=Josephson_current_k,
-#         params=params, k_y_values=k_y_values, phi_values=phi_values)
+np.savez(f"Data/Josephson_current_theta_{np.round(theta,3)}_phi_angle_{np.round(phi_angle, 3)}_phi_values_{len(phi_values)}_k_y_values_{len(k_y_values)}_tJ_{np.round(t_J, 3)}_oposed_magnetic_field", Josephson_current=Josephson_current, J_0=J_0,
+         Josephson_current_k=Josephson_current_k,
+        params=params, k_y_values=k_y_values, phi_values=phi_values)

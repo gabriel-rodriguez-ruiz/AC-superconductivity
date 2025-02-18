@@ -51,10 +51,9 @@ plt.show()
 
 #%% Plot Josephson_current_k
 
-s = "Josephson current.npz"
-theta = np.pi/2
-phi_angle = 0
-B = 0.4
+# s = "Josephson_current_theta_1.571_phi_angle_0_phi_values_240_k_y_values_200_tJ_1.0_oposed_magnetic_field.npz"
+s = "Josephson_current_theta_1.571_phi_angle_0_phi_values_240_k_y_values_200_tJ_1.0.npz"
+
 file_to_open = data_folder / s
 
 
@@ -66,7 +65,9 @@ params = data["params"].item()
 phi_values = params["phi_values"]    #240
 k_y_values = params["k_y_values"]     #75
 dphi = np.diff(phi_values)
-
+theta = params["theta"]
+phi_angle = params["phi_angle"]
+B = params["B"]
 
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$\phi/(2\pi)$")
@@ -91,8 +92,8 @@ def get_Josephson_current(k, phi, t_J, v):
     return (1/2 * t_J**2 * np.cos(phi/2) * np.sin(phi/2)
             / np.sqrt((v*k)**2 + t_J**2 * np.cos(phi/2)**2))
 
-t_J = 5
-v = 50
+t_J = 10/10
+v = 0.56    
 k_values = k_y_values #np.linspace(0, np.pi/2, 10)
 fig, ax  = plt.subplots()
 for k in k_values:
