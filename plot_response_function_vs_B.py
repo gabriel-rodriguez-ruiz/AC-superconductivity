@@ -14,7 +14,7 @@ plt.rcParams.update({
     "text.usetex": True})
 
 data_folder = Path("Data/")
-file_to_open = data_folder / "Response_kernel_vs_B_with_dissorder_mu=-39_L=5_Gamma=0.1_Omega=0_Lambda=0.56_B_in_(0-3.0)_Delta_0=1.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_with_field_dissorder_mu=-40_L=20_Gamma_0=0.01_Gamma_1=0.3_Omega=0_Lambda=0.56_B_in_(0-0.22)_Delta=0.2.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]
@@ -26,15 +26,21 @@ w_0 = Data["w_0"]
 mu = Data["mu"]
 part = Data["part"]
 Omega = Data["Omega"]
-Gamma = Data["Gamma"]
+# Gamma = Data["Gamma"]
+Gamma_0 = Data["Gamma_0"]
+
 if "U" in list(Data.keys()):
     U = Data["U"]
+else:
+    U = None
 # L_x = Data["L_x"]
 # L_y = Data["L_y"]
 
 fig, ax = plt.subplots()
-ax.plot(B_values/Delta, np.sqrt(K[:, 0, 0]), "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})"+r", $U=$"+f"{U})")
-ax.plot(B_values/Delta, np.sqrt(K[:, 1, 0]), "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})"+r", $U=$"+f"{U})")
+ax.plot(B_values/Delta, np.sqrt(K[:, 0, 0]), "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
+ax.plot(B_values/Delta, np.sqrt(K[:, 1, 0]), "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
+ax.plot(B_values/Delta, 0.3418 - 0.06*(B_values/Delta)**2, "--")
+# ax.plot(B_values/Delta, 0.3918 - 0.05*(B_values/Delta)**2, "--")
 
 # f_kin_perp = K[:, 0, 0]/K[0, 0, 0]
 # f_kin_par = K[:, 1, 0]/K[0, 0, 0]
@@ -62,12 +68,13 @@ ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
              +r"; $\theta=$" + f"{theta:.3}"
              + r"; $\mu=$"+f"{mu}"
              +r"; $w_0=$"+f"{w_0}"
-             +r"; $\Gamma=$"+f"{Gamma}")
+             +r"; $\Gamma_0=$"+f"{Gamma_0}")
 # ax.annotate(f"L={L_x}", (0.5, 0.75), xycoords="figure fraction")
-ax.set_xlabel(r"$\frac{B_y^2}{\Delta}$")
+ax.set_xlabel(r"$\frac{B_y}{\Delta}$")
 ax.set_ylabel(r"$K(B_y,\Omega=$"+f"{Omega})")
 ax.legend()
 plt.tight_layout()
+plt.show()
 
 #%%
 file_to_open = data_folder / "Response_kernel_vs_B_with_dissorder_mu=-39_L=1_Gamma=0.1_Omega=0_Lambda=0.56_B_in_(0-0.6)_U=1.npz"

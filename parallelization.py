@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from pathlib import Path
 
-L_x = 5#100  
-L_y = 5#100
+L_x = 30 #100  
+L_y = 30 #100
 w_0 = 10
-Delta = 0
-mu = -39
+Delta = 0.2
+mu = -40
 theta = np.pi/2
 B = 1*Delta
 B_x = B * np.cos(theta)
@@ -28,8 +28,8 @@ superconductor_params = {"w_0":w_0, "Delta":Delta,
           "B_x":B_x, "B_y":B_y, "Lambda":Lambda,
           }
 
-Gamma = 0.1
-Delta_0 = 1
+Gamma_0 = 0.01
+Gamma_1 = 0.3
 alpha = 0
 beta = 0
 Beta = 1000
@@ -37,7 +37,7 @@ k_x_values = 2*np.pi*np.arange(0, L_x)/L_x
 k_y_values = 2*np.pi*np.arange(0, L_x)/L_y
 # k_x_values = np.pi*np.arange(-L_x, L_x)/L_x
 # k_y_values = np.pi*np.arange(-L_y, L_x)/L_y
-n_cores = 8
+n_cores = 12
 # epsrel=1e-01
 
 # omega_values = np.linspace(-45, 0, 100)
@@ -48,10 +48,9 @@ part = "total"
 # fermi_function = lambda omega: 1/(1 + np.exp(Beta*omega))
 # fermi_function = lambda omega: 1 - np.heaviside(omega, 1)
 params = {
-    "Gamma":Gamma, "alpha":alpha,
+    "Gamma_0":Gamma_0, "alpha":alpha,
     "beta":beta, "Omega":Omega, "part":part,
     "theta":theta, "L_x":L_x, "L_y":L_y,
-    "Delta_0": Delta_0
     }
 
 def fermi_function(omega):
@@ -66,17 +65,18 @@ S = Superconductor(**superconductor_params)
 def integrate(B):
     S.B_x = B * np.cos(theta)
     S.B_y = B * np.sin(theta)
-    return [S.get_response_function_quad(0, 0, L_x, L_y, Gamma, fermi_function, Omega, Delta_0, part),
-            S.get_response_function_quad(1, 1, L_x, L_y, Gamma, fermi_function, Omega, Delta_0, part)]
+    Gamma = Gamma_0 + Gamma_1 * B**2
+    return [S.get_response_function_quad(0, 0, L_x, L_y, Gamma, fermi_function, Omega, Delta, part),
+            S.get_response_function_quad(1, 1, L_x, L_y, Gamma, fermi_function, Omega, Delta, part)]
 
 if __name__ == "__main__":
-    B_values = np.linspace(0, 3*Delta_0, 8)
+    B_values = np.linspace(0, 1.5*Delta, 12)
     with multiprocessing.Pool(n_cores) as pool:
         results_pooled = pool.map(integrate, B_values)
     K = np.array(results_pooled)
     
     data_folder = Path("Data/")
-    name = f"Response_kernel_vs_B_with_dissorder_mu={mu}_L={L_x}_Gamma={Gamma}_Omega={Omega}_Lambda={Lambda}_B_in_(0-{np.round(np.max(B_values),2)})_Delta_0={Delta_0}.npz"
+    name = f"Response_kernel_vs_B_with_field_dissorder_mu={mu}_L={L_x}_Gamma_0={Gamma_0}_Gamma_1={Gamma_1}_Omega={Omega}_Lambda={Lambda}_B_in_(0-{np.round(np.max(B_values),2)})_Delta={Delta}.npz"
     file_to_open = data_folder / name
     np.savez(file_to_open , K=K, B_values=B_values,
              **params, **superconductor_params)

@@ -151,7 +151,7 @@ class Superconductor():
             4x4 self-energy.
         """
         Sigma_Gamma = 1j*Gamma * np.kron(tau_0, sigma_0)
-        Sigma_0 = 1j*U * np.kron(tau_0, sigma_x) 
+        # Sigma_0 = 1j*U * np.kron(tau_0, sigma_x) 
         # Sigma_B = 1j*U/(omega**2 - self.Delta**2)**(3/2) * (
         #     self.Delta**2 * (self.B_x * np.kron(tau_0, sigma_x)
         #                      + self.B_y * np.kron(tau_0, sigma_y)
@@ -159,7 +159,7 @@ class Superconductor():
         #                      (self.B_x * np.kron(tau_x, sigma_x)
         #                       + self.B_y * np.kron(tau_x, sigma_y)))
         #     )
-        return Sigma_Gamma + Sigma_0 #+ Sigma_B
+        return Sigma_Gamma #+ Sigma_0  Sigma_B
     def get_self_energy_proximity_effect(self, omega, Gamma, Delta_0):
         if omega>self.Delta:
             return -1j * Gamma /(np.sqrt(omega**2 - Delta_0**2)) * (-omega * np.kron(tau_0, sigma_0) + Delta_0 * np.kron(tau_x, sigma_0))
@@ -187,8 +187,8 @@ class Superconductor():
 
         """
         H_k = self.get_Hamiltonian(k_x, k_y)
-        # Sigma = self.get_self_energy_small_Delta(omega, Gamma, U)
-        Sigma = self.get_self_energy_proximity_effect(omega, Gamma, Delta_0)
+        Sigma = self.get_self_energy_small_Delta(omega, Gamma, U=0)
+        # Sigma = self.get_self_energy_proximity_effect(omega, Gamma, Delta_0)
         return np.linalg.inv(omega*np.kron(tau_0, sigma_0)
                              - H_k
                              + Sigma
