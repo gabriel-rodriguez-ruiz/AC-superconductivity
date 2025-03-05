@@ -14,7 +14,7 @@ plt.rcParams.update({
     "text.usetex": True})
 
 data_folder = Path("Data/")
-file_to_open = data_folder / "Response_kernel_vs_B_with_field_dissorder_mu=-40_L=20_Gamma_0=0.01_Gamma_1=0.3_Omega=0_Lambda=0.56_B_in_(0-0.22)_Delta=0.2.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_with_field_dissorder_mu=-40_L=100_Gamma_0=0.01_Gamma_1=0.3_Omega=0_Lambda=0.56_B_in_(0-0.3)_Delta=0.2.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]
@@ -37,10 +37,16 @@ else:
 # L_y = Data["L_y"]
 
 fig, ax = plt.subplots()
-ax.plot(B_values/Delta, np.sqrt(K[:, 0, 0]), "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
-ax.plot(B_values/Delta, np.sqrt(K[:, 1, 0]), "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
-ax.plot(B_values/Delta, 0.3418 - 0.06*(B_values/Delta)**2, "--")
-# ax.plot(B_values/Delta, 0.3918 - 0.05*(B_values/Delta)**2, "--")
+ax.plot(B_values/Delta, K[:, 0, 0], "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
+ax.plot(B_values/Delta, K[:, 1, 0], "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
+# ax.plot(B_values/Delta, 0.3933 - 0.035*(B_values/Delta)**2, "--")
+# ax.plot(B_values/Delta, 0.3933 - 0.055*(B_values/Delta)**2, "--")
+# ax.plot(B_values/Delta, np.sqrt(1/(0+1/K[:, 0, 0])), "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
+# ax.plot(B_values/Delta, np.sqrt(1/(0+1/K[:, 1, 0])), "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
+# ax.plot(B_values/Delta, 0.246 - 0.01*(B_values/Delta)**2, "--")
+# ax.plot(B_values/Delta, 0.246 - 0.015*(B_values/Delta)**2, "--")
+
+# ax.set_xlim((0, 1))
 
 # f_kin_perp = K[:, 0, 0]/K[0, 0, 0]
 # f_kin_par = K[:, 1, 0]/K[0, 0, 0]

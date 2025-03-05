@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from pathlib import Path
 
-L_x = 30 #100  
-L_y = 30 #100
+L_x = 100 #100  
+L_y = 100 #100
 w_0 = 10
 Delta = 0.2
-mu = -40
+mu = -39
 theta = np.pi/2
 B = 1*Delta
 B_x = B * np.cos(theta)
@@ -70,7 +70,7 @@ def integrate(B):
             S.get_response_function_quad(1, 1, L_x, L_y, Gamma, fermi_function, Omega, Delta, part)]
 
 if __name__ == "__main__":
-    B_values = np.linspace(0, 1.5*Delta, 12)
+    B_values = np.linspace(0, 1.5*Delta, 16)
     with multiprocessing.Pool(n_cores) as pool:
         results_pooled = pool.map(integrate, B_values)
     K = np.array(results_pooled)
