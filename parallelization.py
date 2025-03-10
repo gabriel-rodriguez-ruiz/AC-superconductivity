@@ -8,7 +8,6 @@ Created on Wed May 22 15:04:04 2024
 
 import numpy as np
 from superconductor import Superconductor
-import matplotlib.pyplot as plt
 import multiprocessing
 from pathlib import Path
 
@@ -16,7 +15,7 @@ L_x = 100 #100
 L_y = 100 #100
 w_0 = 10
 Delta = 0.2
-mu = -39
+mu = -37
 theta = np.pi/2
 B = 1*Delta
 B_x = B * np.cos(theta)
@@ -37,7 +36,7 @@ k_x_values = 2*np.pi*np.arange(0, L_x)/L_x
 k_y_values = 2*np.pi*np.arange(0, L_x)/L_y
 # k_x_values = np.pi*np.arange(-L_x, L_x)/L_x
 # k_y_values = np.pi*np.arange(-L_y, L_x)/L_y
-n_cores = 12
+n_cores = 16
 # epsrel=1e-01
 
 # omega_values = np.linspace(-45, 0, 100)
