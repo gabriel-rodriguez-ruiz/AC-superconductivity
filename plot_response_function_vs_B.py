@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 plt.rcParams.update({
-    "text.usetex": True})
+    "text.usetex": False})
 
 data_folder = Path("Data/")
 file_to_open = data_folder / "Response_kernel_vs_B_with_field_dissorder_mu=-40_L=100_Gamma_0=0.01_Gamma_1=0.3_Omega=0_Lambda=0.56_B_in_(0-0.3)_Delta=0.2.npz"
@@ -48,7 +48,6 @@ ax.plot(B_values/Delta, K[:, 1, 0], "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Om
 # ax.plot(B_values/Delta, np.sqrt(1/(0+1/K[:, 1, 0])), "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
 # ax.plot(B_values/Delta, 0.246 - 0.01*(B_values/Delta)**2, "--")
 # ax.plot(B_values/Delta, 0.246 - 0.015*(B_values/Delta)**2, "--")
-
 # ax.set_xlim((0, 1))
 
 # f_kin_perp = K[:, 0, 0]/K[0, 0, 0]

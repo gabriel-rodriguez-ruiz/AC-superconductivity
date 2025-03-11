@@ -52,7 +52,7 @@ plt.show()
 #%% Plot Josephson_current_k
 
 # s = "Josephson_current_theta_1.571_phi_angle_0_phi_values_240_k_y_values_200_tJ_1.0_oposed_magnetic_field.npz"
-s = "Josephson_current_theta_1.571_phi_angle_0_phi_values_240_k_y_values_200_tJ_1.0.npz"
+s = "Josephson_current_theta_1.571_phi_angle_0_phi_values_240_k_y_values_3_tJ_5.0_antiparallel_True.npz"
 
 file_to_open = data_folder / s
 
