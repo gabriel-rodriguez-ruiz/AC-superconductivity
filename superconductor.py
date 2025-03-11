@@ -33,32 +33,37 @@ class Superconductor():
         Magnetic field in y direction.
     """
     def __init__(self, w_0, mu, Delta,
-                 B_x, B_y, Lambda):
+                 B_x, B_y, Lambda_R, Lambda_D):
         self.w_0 = w_0
         self.mu = mu
         self.Delta = Delta
-        self.Lambda = Lambda
+        self.Lambda_R = Lambda_R
+        self.Lambda_D = Lambda_D
         self.B_x = B_x
         self.B_y = B_y
+
     def get_velocity_0(self, k_x, k_y):
         v_0_k_x = (
                    2*self.w_0*np.sin(k_x) * np.kron(tau_0, sigma_0)
-                   + 2*self.Lambda*np.cos(k_x) * np.kron(tau_0, sigma_y)
+                   + 2*self.Lambda_R*np.cos(k_x) * np.kron(tau_0, sigma_y)
+                   - 2*self.Lambda_D*np.cos(k_x) * np.kron(tau_0, sigma_x)
                    )
         v_0_k_y = (
                    2*self.w_0*np.sin(k_y) * np.kron(tau_0, sigma_0)
-                   - 2*self.Lambda*np.cos(k_y) * np.kron(tau_0, sigma_x)
+                   - 2*self.Lambda_R*np.cos(k_y) * np.kron(tau_0, sigma_x)
+                   + 2*self.Lambda_D*np.cos(k_y) * np.kron(tau_0, sigma_y)
                    )
         return [v_0_k_x, v_0_k_y]
     def get_velocity_1(self, k_x, k_y):
         v_1_k_x = (
                    2*self.w_0*np.cos(k_x) * np.kron(tau_z, sigma_0)
-                   - 2*self.Lambda*np.sin(k_x) * np.kron(tau_z, sigma_y)
+                   - 2*self.Lambda_R*np.sin(k_x) * np.kron(tau_z, sigma_y)
+                   - 2*self.Lambda_D*np.sin(k_x) * np.kron(tau_z, sigma_x)
                    )
         v_1_k_y = (
                    2*self.w_0*np.cos(k_y) * np.kron(tau_z, sigma_0)
-                   + 2*self.Lambda*np.sin(k_y) * np.kron(tau_z, sigma_x)
-                   )
+                   + 2*self.Lambda_R*np.sin(k_y) * np.kron(tau_z, sigma_x)
+                   + 2*self.Lambda_D*np.sin(k_y) * np.kron(tau_z, sigma_y))
         return [v_1_k_x, v_1_k_y]
     def get_Hamiltonian(self, k_x, k_y):
         r""" Periodic Hamiltonian in x and y with magnetic field.
@@ -83,12 +88,14 @@ class Superconductor():
             \lambda_{k_y} =  - 2\lambda sin(k_y)
         """
         chi_k = -2*self.w_0*(np.cos(k_x) + np.cos(k_y)) - self.mu
-        Lambda_k_x = 2*self.Lambda*np.sin(k_x)
-        Lambda_k_y = -2*self.Lambda*np.sin(k_y) 
+        Lambda_R_k_x = 2*self.Lambda_R*np.sin(k_x)
+        Lambda_R_k_y = -2*self.Lambda_R*np.sin(k_y)
+        Lambda_D_k_y = 2*self.Lambda_R*np.sin(k_y)
+        Lambda_D_k_x = -2*self.Lambda_R*np.sin(k_x)
         H = (
               chi_k * np.kron(tau_z, sigma_0)
-              + Lambda_k_x * np.kron(tau_z, sigma_y)
-              + Lambda_k_y * np.kron(tau_z, sigma_x)
+              + (Lambda_R_k_x + Lambda_D_k_y) * np.kron(tau_z, sigma_y)
+              + (Lambda_R_k_y + Lambda_D_k_x) * np.kron(tau_z, sigma_x)
               - self.B_x * np.kron(tau_0, sigma_x)
               - self.B_y * np.kron(tau_0, sigma_y)
               + self.Delta * np.kron(tau_x, sigma_0)
@@ -529,7 +536,7 @@ class Superconductor():
                 # poles = None
                 params = (k_x, k_y, alpha, beta, Gamma, Fermi_function, Omega, Delta_0, part)
                 K_inductive_k[i, j] = scipy.integrate.quad(inductive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
-                K_ressistive_k[i, j] = scipy.integrate.quad(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
+                # K_ressistive_k[i, j] = scipy.integrate.quad(ressistive_integrand, a, b, args=params, points=poles, epsrel=epsrel)[0]
         
         K_inductive = 1/(L_x*L_y) * (np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]>0)
                                       + np.sum(K_inductive_k[i,j] for i in range(np.shape(K_inductive_k)[0]) for j in range(np.shape(K_inductive_k)[1]) if K_inductive_k[i,j]<0)
