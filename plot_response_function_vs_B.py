@@ -41,8 +41,8 @@ ax.plot(B_values/Delta, K[:, 0, 0], "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Om
 ax.plot(B_values/Delta, K[:, 1, 0], "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
 # ax.plot(B_values/Delta, 1.25 - 0.25*(B_values/Delta)**2, "--")
 # ax.plot(B_values/Delta, 1.25 - 0.55*(B_values/Delta)**2, "--")
-ax.plot(B_values/Delta, 0.154 - 0.025*(B_values/Delta)**2, "--")
-ax.plot(B_values/Delta, 0.154 - 0.04*(B_values/Delta)**2, "--")
+# ax.plot(B_values/Delta, 0.154 - 0.025*(B_values/Delta)**2, "--")
+# ax.plot(B_values/Delta, 0.154 - 0.04*(B_values/Delta)**2, "--")
 
 # ax.plot(B_values/Delta, np.sqrt(1/(0+1/K[:, 0, 0])), "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
 # ax.plot(B_values/Delta, np.sqrt(1/(0+1/K[:, 1, 0])), "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
