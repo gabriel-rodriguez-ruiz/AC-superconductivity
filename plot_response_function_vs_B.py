@@ -14,12 +14,13 @@ plt.rcParams.update({
     "text.usetex": False})
 
 data_folder = Path("Data/")
-file_to_open = data_folder / "Response_kernel_vs_B_with_field_dissorder_mu=-40_L=100_Gamma_0=0.01_Gamma_1=0.3_Omega=0_Lambda=0.56_B_in_(0-0.3)_Delta=0.2.npz"
+file_to_open = data_folder / "Response_kernel_vs_B_with_field_dissorder_mu=-39_L=100_Gamma_0=0.01_Gamma_1=0.3_Omega=0_Lambda_R=0.56_Lambda_D=0_B_in_(0-0.3)_Delta=0.2_points=16.npz"
 Data = np.load(file_to_open)
 
 K = Data["K"]
 B_values = Data["B_values"]
-Lambda = Data["Lambda"]
+Lambda_R = Data["Lambda_R"]
+Lambda_D = Data["Lambda_D"]
 Delta = Data["Delta"]
 theta = Data["theta"]
 w_0 = Data["w_0"]
@@ -37,8 +38,8 @@ else:
 # L_y = Data["L_y"]
 
 fig, ax = plt.subplots()
-ax.plot(B_values/Delta, K[:, 0, 0], "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
-ax.plot(B_values/Delta, K[:, 1, 0], "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda=$"+f"{Lambda})")
+ax.plot(B_values/Delta, K[:, 0, 0], "-o",  label=r"$K^{(L)}_{xx}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda_R=$"+f"{Lambda_R})")
+ax.plot(B_values/Delta, K[:, 1, 0], "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)}"+r", $\lambda_R=$"+f"{Lambda_R})")
 # ax.plot(B_values/Delta, 1.25 - 0.25*(B_values/Delta)**2, "--")
 # ax.plot(B_values/Delta, 1.25 - 0.55*(B_values/Delta)**2, "--")
 # ax.plot(B_values/Delta, 0.154 - 0.025*(B_values/Delta)**2, "--")
@@ -71,7 +72,7 @@ ax.plot(B_values/Delta, K[:, 1, 0], "-o",  label=r"$K^{(L)}_{yy}(\Omega=$"+f"{Om
 # ax.plot(B_values/Delta, K[:, 1, 1]/K[0, 0, 0], "-o",  label=r"$K^{(R)}_{yy}(\Omega=$"+f"{Omega}"+r"$,\mu=$"+f"{np.round(mu,2)})")
 
 
-ax.set_title(r"$\lambda=$" + f"{Lambda:.2}"
+ax.set_title(r"$\lambda_R=$" + f"{Lambda_R:.2}"
              +r"; $\Delta=$" + f"{Delta}"
              +r"; $\theta=$" + f"{theta:.3}"
              + r"; $\mu=$"+f"{mu}"

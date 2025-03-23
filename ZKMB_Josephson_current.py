@@ -20,7 +20,7 @@ t = 10
 Delta_0 = 0.2#t/5     
 Delta_1 = 0#t/20
 Lambda = 0.56
-phi_angle = 0
+phi_angle = np.pi/16
 theta = np.pi/2   #np.pi/2
 B = 2*Delta_0   #2*Delta_0
 B_x = B * np.sin(theta) * np.cos(phi_angle)
@@ -30,7 +30,7 @@ mu = -4*t#-2*t
 t_J = t/2     #t/2#t/5
 phi_values = np.linspace(0, 2*np.pi, 240)    #240
 k_y_values = np.array([-2*np.pi/100, 0, 2*np.pi/100]) #np.linspace(0, 2*np.pi, 200)  #200
-antiparallel = True
+antiparallel = False
 
 params = {"L_x":L_x, "t":t, "t_J":t_J,
           "Delta_0":Delta_0,
