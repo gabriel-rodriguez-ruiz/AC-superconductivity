@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 # L_y = 200
 # k_x_values = np.linspace(-np.pi/6, np.pi/6, 100)
 
-L_x = 300
+L_x = 100
 k_y_values = np.linspace(-np.pi/6, np.pi/6, 100)
 
 t = 10   #10
@@ -124,8 +124,8 @@ plt.show()
 
 #%%
 
-k_y = 0
-mu_values = np.linspace(-4*t - 2* np.sqrt(B**2 - Delta_0**2), -4*t + 2 * np.sqrt(B**2 - Delta_0**2), 100)
+k_y = np.arccos(1.9/2)#0
+mu_values = np.linspace(-4*t - 2* np.sqrt(B**2 - Delta_0**2), -4*t + 2 * np.sqrt(B**2 - Delta_0**2) + 1, 200)
 E_mu = np.zeros((len(mu_values), 4*L_x))
 for i, mu in enumerate(mu_values):
     S = ZKMBSuperconductorKY(k_y, L_x, t, mu, Delta_0, Delta_1, Lambda,
