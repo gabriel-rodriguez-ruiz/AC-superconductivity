@@ -13,7 +13,9 @@ from hamiltonian import Hamiltonian
 class Junction(Hamiltonian):
     r"""
     Superconductors 1 and 2 should not be periodic.
+    
     .. math ::
+        
         H_J = t_J/2\sum_m^{L_y}[\vec{c}_{L_x-1,m}^\dagger(cos(\phi/2)
               \tau_z\sigma_0
               +isin(\phi/2)\tau_0\sigma_0)\vec{c}_{L_x,m}+H.c.]

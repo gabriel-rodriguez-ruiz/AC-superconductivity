@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({
     "text.usetex": False})
 
-L_x = 500
+L_x = 200#500
 t = 10
 Delta_0 = 0.2#t/5     
 Delta_1 = 0#t/20
@@ -29,7 +29,7 @@ B_z = B * np.cos(theta)
 mu = -4*t#-2*t
 t_J = t/2     #t/2#t/5
 phi_values = np.linspace(0, 2*np.pi, 240)    #240
-k_y_values = np.array([0]) #np.linspace(0, 2*np.pi, 200)  #200
+k_y_values = np.array([-0.01, 0, 0.01]) #np.linspace(0, 2*np.pi, 200)  #200
 antiparallel = False
 
 params = {"L_x":L_x, "t":t, "t_J":t_J,
@@ -42,7 +42,7 @@ params = {"L_x":L_x, "t":t, "t_J":t_J,
           }
 
 eigenvalues = []
-for k_y in k_y_values:
+for k_y in k_y_values:      ##############changed sign of Lambda
     eigenvalues_k = []
     print(k_y)
     for phi in phi_values:
@@ -62,28 +62,35 @@ E_phi = eigenvalues
 #%% Plotting for a given k
 
 fig, ax = plt.subplots()
-j = 0   #index of k-value
+j = 2   #index of k-value
 for i in range(np.shape(E_phi)[2]):
-    ax.plot(phi_values, E_phi[j, :, i], ".k", markersize=0.1)
+    ax.plot(phi_values, E_phi[j, :, i], "ok", markersize=0.5)
+    # ax.plot(phi_values, E_phi[j+1, :, i], "or", markersize=0.5)
 
 ax.set_title(f"k={k_y_values[j]}")
 ax.set_xlabel(r"$\phi$")
 ax.set_ylabel(r"$E_k$")
+ax.set_ylim((-0.02, 0.02))
 plt.show()
+
 #%% Total energy
 
-# E_positive = E_phi[:, :, np.shape(E_phi)[2]//2:]
-E_positive = np.where(E_phi > 0, E_phi, np.zeros_like(E_phi))
-total_energy_k = np.sum(E_positive, axis=2)
+total_energy_k = np.zeros((len(k_y_values)//2 + 1, len(phi_values)))
 
-total_energy = np.sum(total_energy_k, axis=0) 
-phi_eq = phi_values[np.where(min(-total_energy)==-total_energy)]
+for i in range(len(k_y_values)//2 + 1):
+    E_phi_k_minus_k = (E_phi[i, :, :] + E_phi[len(k_y_values)-(i+1), :, :]) / 2
+    E_positive = np.where(E_phi_k_minus_k > 0, E_phi_k_minus_k, np.zeros_like(E_phi_k_minus_k))
+    total_energy_k[i] = np.sum(E_positive, axis=1)
 
+fig, ax = plt.subplots()
+# ax.plot(phi_values, total_energy_k[0, :], "ok", markersize=0.5)
+ax.plot(phi_values, total_energy_k[1, :], "or", label=f"{k_y_values[1]}", markersize=0.5)
+ax.legend()
 #%% Josephson current
 
 dphi = np.diff(phi_values)
-Josephson_current = np.diff(-total_energy)
-Josephson_current_k = np.diff(-total_energy_k)
+Josephson_current_k = np.diff(-total_energy_k) / dphi
+Josephson_current = np.sum(Josephson_current_k, axis=0)
 
 J_0 = np.max(Josephson_current) 
 fig, ax = plt.subplots()
@@ -100,10 +107,10 @@ ax.set_title("Josephson current for given k\n"+
              r"; $\varphi=$" + f"{np.round(phi_angle, 2)}"
              r"; $B=$" + f"{B}")
 
-for i, k in enumerate(k_y_values):
+for i in range(len(k_y_values)//2 + 1):
     ax.scatter(phi_values[:-1]/(2*np.pi), Josephson_current_k[i,:],
                marker=".",
-               label=r"$k_y=$" + f"{np.round(k_y_values[i], 2)}")
+               label=r"$|k_y|=$" + f"{np.abs(np.round(k_y_values[i], 3))}")
 
 ax.legend(fontsize= "xx-small")
 plt.show()
