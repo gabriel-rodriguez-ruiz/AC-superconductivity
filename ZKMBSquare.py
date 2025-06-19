@@ -14,13 +14,13 @@ from functions import get_components
 from pauli_matrices import tau_y, sigma_y
 
 L_x = 200
-L_y = 700
+L_y = 1000#1000#700
 t = 10
 Delta_0 = 0.2
 Delta_1 = 0
 Lambda = 0.56
 theta = np.pi/2     #spherical coordinates
-phi = 0
+phi = np.pi/4
 B = 2*Delta_0
 B_x = B * np.sin(theta) * np.cos(phi)
 B_y = B * np.sin(theta) * np.sin(phi)
@@ -59,9 +59,9 @@ zero_state = []
 
 for i in index:
     destruction_up, destruction_down, creation_down, creation_up = get_components(eigenvectors_sparse[:,i], L_x, L_y)
-    probability_density.append((np.abs(destruction_up)**2 + np.abs(destruction_down)**2 + np.abs(creation_down)**2 + np.abs(creation_up)**2)/(np.linalg.norm(np.abs(destruction_up)**2 + np.abs(destruction_down)**2 + np.abs(creation_down)**2 + np.abs(creation_up)**2)))
+    probability_density.append((np.abs(destruction_up)**2 + np.abs(destruction_down)**2 + np.abs(creation_down)**2 + np.abs(creation_up)**2))
     zero_state.append(np.stack((destruction_up, destruction_down, creation_down, creation_up), axis=2)) #positive energy eigenvector splitted in components
-
+    
 # for i in index:
 #     destruction_up, destruction_down, creation_down, creation_up = get_components(eigenvectors[:,i], L_x, L_y)
 #     probability_density.append((np.abs(destruction_up)**2 + np.abs(destruction_down)**2 + np.abs(creation_down)**2 + np.abs(creation_up)**2)/(np.linalg.norm(np.abs(destruction_up)**2 + np.abs(destruction_down)**2 + np.abs(creation_down)**2 + np.abs(creation_up)**2)))
@@ -73,7 +73,8 @@ for i in index:
 index = 0
 
 fig, ax = plt.subplots()
-image = ax.imshow(probability_density[index], cmap="Blues", origin="lower") #I have made the transpose and changed the origin to have xy axes as usually
+image = ax.imshow(probability_density[index], cmap="Blues", origin="lower",
+                  aspect=0.3) #I have made the transpose and changed the origin to have xy axes as usually
 plt.colorbar(image)
 ax.set_xlabel("x")
 ax.set_ylabel("y")
@@ -114,3 +115,15 @@ ax.set_title("Probability density" + "\n" +
 # ax.set_title(f"{k for k in superconductor_params.keys()}")
 plt.tight_layout()
 plt.show()
+
+#%% Save
+# from pathlib import Path
+
+# data_folder = Path("Data/")
+
+
+# name = f"Probability_density_Periodic_in_Y_mu_{mu}_L_x={L_x}_L_y={L_y}_B_x={np.round(B_x,3)}_B_y={np.round(B_y,3)}_B_z={np.round(B_z,3)}.npz"
+# file_to_open = data_folder / name
+# np.savez(file_to_open, probability_density=probability_density, k=k, index=index, L_x=L_x, L_y=L_y,
+#          **superconductor_params)
+# print("\007")

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 # L_y = 200
 # k_x_values = np.linspace(-np.pi/6, np.pi/6, 100)
 
-L_x = 100
+L_x = 200
 k_y_values = np.linspace(-np.pi/6, np.pi/6, 100)
 
 t = 10   #10
@@ -27,7 +27,7 @@ B = 2*Delta_0    #0.4*Delta_0    #2*Delta_0   #2*Delta_0
 B_x = B * np.sin(theta) * np.cos(phi)
 B_y = B * np.sin(theta) * np.sin(phi)
 B_z = B * np.cos(theta)
-mu = -40  #in the middle ot the topological phase
+mu = -39.7  #-40 in the middle ot the topological phase
 
 superconductor_params = {"t":t, "Delta_0":Delta_0,
           "mu":mu, "Delta_1":Delta_1,
@@ -118,13 +118,9 @@ fig.suptitle(r"$L_x=$"+f"{L_x}"
              +r"; $B_z=$"+f"{np.round(B_z, 2)}")
 axs[0].set_ylim((-2, 2))
 
-plt.tight_layout()
 
-plt.show()
 
-#%%
-
-k_y = np.arccos(1.9/2)#0
+k_y = 0
 mu_values = np.linspace(-4*t - 2* np.sqrt(B**2 - Delta_0**2), -4*t + 2 * np.sqrt(B**2 - Delta_0**2) + 1, 200)
 E_mu = np.zeros((len(mu_values), 4*L_x))
 for i, mu in enumerate(mu_values):
@@ -138,8 +134,15 @@ axs[1].plot(mu_values[27:73], E_mu[27:73,2*L_x-1:2*L_x+1]/Delta_0, color="red")
 axs[1].set_xlabel(r"$\mu$")
 axs[1].set_ylabel(r"$\frac{E(\mu)}{\Delta_0}$")
 axs[1].set_title(r"$k_y=$"+f"{k_y}")
-axs[1].axvline(-4*t + np.sqrt(B**2 - Delta_0**2))
-axs[1].axvline(-4*t - np.sqrt(B**2 - Delta_0**2))
+# axs[1].axvline(-4*t + np.sqrt(B**2 - Delta_0**2))
+# axs[1].axvline(-4*t - np.sqrt(B**2 - Delta_0**2))
+axs[1].axvline(-4*t + np.sqrt((B**2-Lambda**2*np.sin(k_y)**2)**2/B**2 - Delta_0**2), color="blue")
+axs[1].axvline(-4*t - np.sqrt((B**2-Lambda**2*np.sin(k_y)**2)**2/B**2 - Delta_0**2), color="blue")
+axs[1].axvline(-4*t + np.sqrt((B**2 - Delta_0**2)), color="red")
+axs[1].axvline(-4*t - np.sqrt((B**2 - Delta_0**2)), color="red")
+axs[1].axvline(-2*t*(1 + np.cos(k_y))  + np.sqrt((B**2 - Delta_0**2)), color="green")
+axs[1].axvline(-2*t*(1 + np.cos(k_y))  - np.sqrt((B**2 - Delta_0**2)), color="green")
+
 
 # axs[1].axvline(-4*t + np.sqrt(B**2 - Delta_0**2))
 # axs[1].axvline(-4*t - np.sqrt(B**2 - Delta_0**2))
